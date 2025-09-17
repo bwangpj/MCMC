@@ -7,7 +7,7 @@ open Matrix Finset-- Real
 
 variable {n : Type*} [Fintype n] --[DecidableEq n]
 
--- here we need to make the defs consistent with the one in Kernel
+-- here we need to make the defs consistent with the one in Kernel by creating a Matrix.toKernel API
 
 def IsReversible (P : Matrix n n ℝ) (π : stdSimplex ℝ n) : Prop :=
   ∀ i j, π.val i * P i j = π.val j * P j i
@@ -136,7 +136,7 @@ theorem metropolisHastings_is_stochastic [DecidableEq n]
   Helper lemma: For a > 0 and b ≥ 0: a * min(1, b/a) = min(a, b).
   This identity is central to the proof of detailed balance.
 -/
-lemma mul_min_one_div_eq_min {a b : ℝ} (ha_pos : 0 < a) (hb_nonneg : 0 ≤ b) :
+lemma mul_min_one_div_eq_min {a b : ℝ} (ha_pos : 0 < a) (_hn_in : 0 ≤ b) :
   a * min 1 (b / a) = min a b := by
   by_cases h_le : b ≤ a
   · -- If b ≤ a, then b/a ≤ 1.
