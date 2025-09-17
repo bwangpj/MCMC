@@ -23,7 +23,7 @@ lemma tvDist_nonneg (p q : n → ℝ) : 0 ≤ tvDist p q := by
   have : 0 ≤ ∑ j, |p j - q j| := by
     exact sum_nonneg (fun _ _ => abs_nonneg _)
   have h2 : 0 ≤ (2 : ℝ) := by norm_num
-  simpa [tvDist, div_eq_mul_inv, mul_comm]-- using (mul_nonneg_of_nonneg_of_nonneg this (inv_nonneg.mpr h2))
+  simpa [tvDist, div_eq_mul_inv, mul_comm]
 
 /-- For finite families with equal total mass, each coordinate deviation is bounded by TV. -/
 lemma coord_abs_le_tvDist_of_eq_sum [DecidableEq n] (p q : n → ℝ)
@@ -31,7 +31,6 @@ lemma coord_abs_le_tvDist_of_eq_sum [DecidableEq n] (p q : n → ℝ)
     |p j - q j| ≤ tvDist p q := by
   have hx_sum0 : ∑ t, (p t - q t) = 0 := by
     simp [sum_sub_distrib, hsum]
-  -- Split the L1 sum into the `j`-term and the rest.
   have hsplit :
       ∑ t, |p t - q t|
         = |p j - q j| + ∑ t ∈ (Finset.univ.erase j), |p t - q t| := by
@@ -47,10 +46,8 @@ lemma coord_abs_le_tvDist_of_eq_sum [DecidableEq n] (p q : n → ℝ)
                 fun x => congrFun rfl)
       _ = |p j - q j| + ∑ t ∈ ((Finset.univ).erase j), |p t - q t| := by
             simp [Finset.mem_univ]
-  -- The sum of the rest terms equals the negative of the j-term (since the total sum is zero).
   have hrest_sum :
       ∑ t ∈ (Finset.univ.erase j), (p t - q t) = (q j - p j) := by
-    -- Sum over `univ` is zero; isolate the `j`-term.
     have huniv_split :
         ∑ t, (p t - q t)
           = (p j - q j) + ∑ t ∈ (Finset.univ.erase j), (p t - q t) := by
@@ -65,15 +62,12 @@ lemma coord_abs_le_tvDist_of_eq_sum [DecidableEq n] (p q : n → ℝ)
               grind
     have hx0' : (p j - q j) + ∑ t ∈  (Finset.univ.erase j), (p t - q t) = 0 := by
       simpa [huniv_split] using hx_sum0
-    -- Rearranging gives the claim.
     have := eq_neg_of_add_eq_zero_left hx0'
     simpa [sub_eq_add_neg, add_comm] using this
-  -- Triangle inequality on the "rest" yields a lower bound on the L1 sum:
   have hrest_abs_le :
       |∑ t ∈  (Finset.univ.erase j), (p t - q t)|
         ≤ ∑ t ∈  (Finset.univ.erase j), |p t - q t| :=
     (abs_sum_le_sum_abs _ _)
-  -- Combine to get a lower bound on the L1 sum.
   have hL1_ge :
       ∑ t, |p t - q t| ≥ |p j - q j| + |q j - p j| := by
     calc
@@ -82,10 +76,8 @@ lemma coord_abs_le_tvDist_of_eq_sum [DecidableEq n] (p q : n → ℝ)
       _ ≥ |p j - q j| + |∑ t ∈  (Finset.univ.erase j), (p t - q t)| := by
             gcongr
       _ = |p j - q j| + |q j - p j| := by simp [hrest_sum]
-  -- Since |qj - pj| = |pj - qj|, the RHS is 2 * |pj - qj|.
   have h2mul : (∑ t, |p t - q t|) ≥ 2 * |p j - q j| := by
     simpa [two_mul, abs_sub_comm] using hL1_ge
-  -- Divide both sides by 2 > 0 to conclude.
   have h2pos : (0 : ℝ) < 2 := by norm_num
   have h_div : |p j - q j| ≤ (∑ t, |p t - q t|) / 2 := (le_div_iff₀' h2pos).mpr h2mul
   simpa [tvDist, div_eq_mul_inv, mul_comm] using h_div
@@ -98,7 +90,6 @@ def dobrushinCoeff (P : Matrix n n ℝ) : ℝ :=
   sSup { d | ∃ i i' : n, d = tvDist (rowDist P i) (rowDist P i') }
 
 lemma dobrushinCoeff_nonneg [Nonempty n] (P : Matrix n n ℝ) : 0 ≤ dobrushinCoeff P := by
-  -- Identify the set as a finite range to get boundedness and nonemptiness.
   let f : (n × n) → ℝ := fun p => tvDist (rowDist P p.1) (rowDist P p.2)
   have hset_eq : { d | ∃ i i' : n, d = tvDist (rowDist P i) (rowDist P i') }
                   = Set.range f := by
@@ -107,11 +98,9 @@ lemma dobrushinCoeff_nonneg [Nonempty n] (P : Matrix n n ℝ) : 0 ≤ dobrushinC
     · intro h; rcases h with ⟨⟨i, i'⟩, rfl⟩; exact ⟨i, i', rfl⟩
   have hfin : (Set.range f).Finite := (Set.finite_range f)
   have hmem : 0 ∈ Set.range f := by
-    -- Take i = i', tvDist = 0
     let i0 : n := Classical.arbitrary n
     refine ⟨⟨i0, i0⟩, ?_⟩
     simp [f, rowDist, tvDist, sub_self, abs_zero, sum_const_zero]
-  -- Conclude 0 ≤ sSup by `le_csSup` on a finite set.
   have hbdd : BddAbove (Set.range f) := hfin.bddAbove
   simpa [dobrushinCoeff, hset_eq] using le_csSup hbdd hmem
 
@@ -122,12 +111,10 @@ lemma tvDist_contract [Nonempty n]
     (hp1 : ∑ j, p j = 1) (hq1 : ∑ j, q j = 1) :
     tvDist ((fun j => ∑ k, p k * P k j)) ((fun j => ∑ k, q k * P k j))
       ≤ dobrushinCoeff P * tvDist p q := by
-  -- set r := p - q, a_j := ∑_k r_k P_{k j}
   let r : n → ℝ := fun k => p k - q k
   have hsum_r : ∑ k, r k = 0 := by
     simp [r, sum_sub_distrib, hp1, hq1]
   let a : n → ℝ := fun j => ∑ k, r k * P k j
-  -- pick signs so that s j * a j = |a j|
   let s : n → ℝ := fun j => if 0 ≤ a j then 1 else -1
   have hs_abs : ∀ j, |s j| = 1 := by
     intro j; by_cases h : 0 ≤ a j
@@ -141,7 +128,6 @@ lemma tvDist_contract [Nonempty n]
     · have : a j < 0 := lt_of_not_ge h
       have hnn : a j ≤ 0 := le_of_lt this
       aesop
-  -- swap the sums: ∑_j s j * a j = ∑_k r k * g k
   let g : n → ℝ := fun k => ∑ j, s j * P k j
   have hswap : ∑ j, s j * a j = ∑ k, r k * g k := by
     unfold a g
@@ -157,7 +143,6 @@ lemma tvDist_contract [Nonempty n]
                     (t := (Finset.univ : Finset n))
                     (f := fun j k => r k * (s j * P k j)))
       _ = ∑ k, r k * ∑ j, s j * P k j := by
-                -- factor `r k` out of the inner sum
                 simp [mul_sum]
   -- oscillation bound for g via rows of P
   have g_diff_le : ∀ k ℓ, |g k - g ℓ| ≤ 2 * dobrushinCoeff P := by
@@ -176,8 +161,6 @@ lemma tvDist_contract [Nonempty n]
               apply sum_congr rfl; intro j _; simp [abs_mul]
         _ = ∑ j, |P k j - P ℓ j| := by
               simp [hs_abs]
-    -- relate ∑ |Pk - Pℓ| to 2 * tvDist(row k, row ℓ) ≤ 2 * δ(P)
-    -- prepare `le_csSup` on the finite range
     let f : (n × n) → ℝ := fun p => tvDist (rowDist P p.1) (rowDist P p.2)
     have hset_eq :
       { d | ∃ i i' : n, d = tvDist (rowDist P i) (rowDist P i') } = Set.range f := by
@@ -194,7 +177,6 @@ lemma tvDist_contract [Nonempty n]
       have : tvDist (rowDist P k) (rowDist P ℓ) ≤ dobrushinCoeff P := h_tv_le
       have hnonneg : 0 ≤ 2 := by norm_num
       simp [*])
-  -- choose kmax,kmin achieving max/min of g
   obtain ⟨kmax, _, hkmax⟩ :=
     Finset.exists_max_image (s := (Finset.univ : Finset n)) (f := fun k => g k)
       (by simp)
@@ -203,7 +185,6 @@ lemma tvDist_contract [Nonempty n]
       (by simp)
   have h_le_max : ∀ k, g k ≤ g kmax := by intro k; exact hkmax k (by simp)
   have h_ge_min : ∀ k, g kmin ≤ g k := by intro k; exact hkmin k (by simp)
-  -- positive/negative parts of r
   let rpos : n → ℝ := fun k => max (r k) 0
   let rneg : n → ℝ := fun k => max (-r k) 0
   have hrpos_nonneg : ∀ k, 0 ≤ rpos k := by
@@ -223,7 +204,6 @@ lemma tvDist_contract [Nonempty n]
     have hsum : (∑ k, rpos k) - (∑ k, rneg k) = 0 := by
       simpa [h_r_decomp, sum_sub_distrib] using hsum_r
     exact sub_eq_zero.mp hsum
-  -- express ∑ |r| as 2α
   have h_abs_split : ∀ k, |r k| = rpos k + rneg k := by
     intro k; by_cases hk : 0 ≤ r k
     · have : -r k ≤ 0 := neg_nonpos.mpr hk
@@ -240,7 +220,6 @@ lemma tvDist_contract [Nonempty n]
       _ = (∑ k, rpos k) + (∑ k, rpos k) := by
           simp [hsum_pos_eq_neg]
       _ = 2 * (∑ k, rpos k) := by ring
-  -- Bound ∑ r·g via α := ∑ rpos = ∑ rneg
   let α : ℝ := ∑ k, rpos k
   have h_sum_pos_le : ∑ k, rpos k * g k ≤ (g kmax) * α := by
     calc
@@ -252,7 +231,6 @@ lemma tvDist_contract [Nonempty n]
         exact Eq.symm (sum_mul univ (fun i => max (r i) 0) (g kmax))
       _ = (g kmax) * α := rfl
   have h_sum_neg_ge : ∑ k, rneg k * g k ≥ (g kmin) * α := by
-    -- rewrite (g kmin) * α using ∑ rneg via hsum_pos_eq_neg, then compare termwise
     have hα : α = ∑ k, rneg k := by
       simpa [α] using hsum_pos_eq_neg
     have h : (g kmin) * α ≤ ∑ k, rneg k * g k := by
@@ -263,7 +241,6 @@ lemma tvDist_contract [Nonempty n]
           apply sum_le_sum; intro k _; exact mul_le_mul_of_nonneg_left (h_ge_min k) (hrneg_nonneg k)
     simpa using h
   have h_rg_le : ∑ k, r k * g k ≤ (g kmax - g kmin) * α := by
-    -- combine the previous bounds and rewrite both sides
     have h' :
         ∑ k, rpos k * g k - ∑ k, rneg k * g k
           ≤ g kmax * α - g kmin * α :=
@@ -285,20 +262,16 @@ lemma tvDist_contract [Nonempty n]
         _ = ∑ k, rpos k * g k - ∑ k, rneg k * g k := by
               simp [sum_sub_distrib]
     simpa [hL] using h''
-  -- from ∑ |a| = ∑ s·a = ∑ r·g, obtain upper bound by oscillation
   have h_sum_bound : ∑ j, |a j| ≤ (g kmax - g kmin) / 2 * ∑ k, |r k| := by
     have hα : α = (∑ k, |r k|) / 2 := by
       have h2pos : (0 : ℝ) < 2 := by norm_num
       have : 2 * α = ∑ k, |r k| := by
-        simp [α, hsum_abs, two_mul]-- using (eq_comm.mp (by simp [hsum_abs, two_mul, α]))
-      -- safer derivation:
+        simp [α, hsum_abs, two_mul]
       have : ∑ k, |r k| = 2 * α := by simpa [α] using hsum_abs
       have hnonneg : 0 ≤ (2 : ℝ) := by norm_num
-      -- divide both sides by 2
       calc
         α = (2 * α) / 2 := by field_simp
         _ = (∑ k, |r k|) / 2 := by simp [this]
-    -- ∑ |a| = ∑ r·g
     have : ∑ j, |a j| = ∑ k, r k * g k := by
       simpa [hswap] using hsum_abs_eq
     calc
@@ -310,12 +283,10 @@ lemma tvDist_contract [Nonempty n]
   -- relate oscillation of g to δ(P)
   have h_osc_le : g kmax - g kmin ≤ 2 * dobrushinCoeff P := by
     have := g_diff_le kmax kmin
-    -- |g kmax - g kmin| = g kmax - g kmin since max ≥ min
     have hge : g kmin ≤ g kmax := h_ge_min kmax
     have : |g kmax - g kmin| = g kmax - g kmin := by
       simp [abs_of_nonneg (sub_nonneg.mpr hge)]
     simp; grind
-  -- finish: rewrite both sides with tvDist and divide by 2
   have hLHS : tvDist (fun j => ∑ k, p k * P k j) (fun j => ∑ k, q k * P k j)
             = (∑ j, |a j|) / 2 := by
     simp only [tvDist, a, r, sub_eq_add_neg]
@@ -328,14 +299,10 @@ lemma tvDist_contract [Nonempty n]
     simp
   have hR_r : tvDist p q = (∑ k, |r k|) / 2 := by
     simp [tvDist, r]
-  -- use (gmax - gmin)/2 ≤ δ(P) to scale the bound
   have hcoef : (g kmax - g kmin) / 2 ≤ dobrushinCoeff P := by
-    -- from h_osc_le: g kmax - g kmin ≤ 2 * dobrushinCoeff P
     have h2pos : (0 : ℝ) < 2 := by norm_num
     rwa [div_le_iff h2pos, mul_comm]
-  -- Combine `h_sum_bound` with `hcoef` to bound `∑ |a|` by `δ(P) * ∑ |r|`.
   have h_mul : (∑ j, |a j|) ≤ dobrushinCoeff P * ∑ k, |r k| := by
-    -- enlarge the right-hand side of `h_sum_bound` using `hcoef`
     have S_nonneg : 0 ≤ ∑ k, |r k| :=
       sum_nonneg (by
         intro _ _
@@ -345,15 +312,11 @@ lemma tvDist_contract [Nonempty n]
           dobrushinCoeff P * (∑ k, |r k|) :=
       mul_le_mul_of_nonneg_right hcoef S_nonneg
     exact h_sum_bound.trans h_temp
-
-  -- Divide both sides by `2` (equivalently multiply by `1/2`).
   have h_div : (∑ j, |a j|) / 2 ≤ (dobrushinCoeff P * ∑ k, |r k|) / 2 := by
     have : (1 / 2 : ℝ) * (∑ j, |a j|) ≤
            (1 / 2 : ℝ) * (dobrushinCoeff P * ∑ k, |r k|) :=
       mul_le_mul_of_nonneg_left h_mul (by norm_num)
     simpa [div_eq_mul_inv, mul_comm, mul_left_comm, mul_assoc] using this
-
-  -- Rewrite both sides via `hLHS` and `hR_r` and conclude the contraction bound.
   have : tvDist (fun j => ∑ k, p k * P k j)
                 (fun j => ∑ k, q k * P k j)
         ≤ dobrushinCoeff P * tvDist p q := by
@@ -369,7 +332,7 @@ lemma dobrushinCoeff_mul [DecidableEq n] (P Q : Matrix n n ℝ)
     (hP : IsStochastic P) (_ : IsStochastic Q) :
     dobrushinCoeff (P * Q) ≤ dobrushinCoeff P * dobrushinCoeff Q := by
   classical
-  -- rewrite δ(P*Q) as sSup over a finite range
+  -- we rewrite δ(P*Q) as sSup over a finite range
   let fPQ : (n × n) → ℝ := fun p => tvDist (rowDist (P * Q) p.1) (rowDist (P * Q) p.2)
   have hset_eq_PQ :
       { d | ∃ i i' : n, d = tvDist (rowDist (P * Q) i) (rowDist (P * Q) i') }
@@ -378,12 +341,10 @@ lemma dobrushinCoeff_mul [DecidableEq n] (P Q : Matrix n n ℝ)
     · intro h; rcases h with ⟨i, i', rfl⟩; exact ⟨⟨i, i'⟩, rfl⟩
     · intro h; rcases h with ⟨⟨i, i'⟩, rfl⟩; exact ⟨i, i', rfl⟩
   have hbddPQ : BddAbove (Set.range fPQ) := (Set.finite_range fPQ).bddAbove
-  -- show every element in the range is ≤ δ(P) * δ(Q)
   have hforall :
       ∀ d ∈ Set.range fPQ, d ≤ dobrushinCoeff P * dobrushinCoeff Q := by
     intro d hd
     rcases hd with ⟨⟨i, i'⟩, rfl⟩
-    -- rows of P have total mass 1 by stochasticity
     have hp1 : ∑ j, rowDist P i j = 1 := by simpa [rowDist] using hP.2 i
     have hq1 : ∑ j, rowDist P i' j = 1 := by simpa [rowDist] using hP.2 i'
     -- contract by Q
@@ -406,7 +367,6 @@ lemma dobrushinCoeff_mul [DecidableEq n] (P Q : Matrix n n ℝ)
     have hnonnegQ : 0 ≤ dobrushinCoeff Q := dobrushinCoeff_nonneg (P := Q)
     have := hcontract.trans (mul_le_mul_of_nonneg_left hleP hnonnegQ)
     simpa [mul_comm] using this
-  -- take supremum over the finite range
   have hnonemptyPQ : (Set.range fPQ).Nonempty := by
     classical
     let i0 : n := Classical.arbitrary n
@@ -438,10 +398,8 @@ lemma dobrushinCoeff_pow [DecidableEq n] (P : Matrix n n ℝ) [Nonempty n] (hP :
         apply sum_le_sum
         intro j _
         simpa using hpt j
-      -- L1 norm of a row of the identity is 1
       have hsum_abs_one (i : n) : ∑ j, |(1 : Matrix n n ℝ) i j| = 1 := by
         classical
-        -- Turn the absolute values into the same indicator form.
         have habs : ∀ j, |(1 : Matrix n n ℝ) i j| = (if i = j then (1 : ℝ) else 0) := by
           intro j
           by_cases h : i = j
@@ -452,14 +410,11 @@ lemma dobrushinCoeff_pow [DecidableEq n] (P : Matrix n n ℝ) [Nonempty n] (hP :
           apply sum_congr rfl
           intro j _
           simpa using habs j
-        -- The sum of the indicator over univ is 1.
         have hsum_ind : ∑ j, (if i = j then (1 : ℝ) else 0) = 1 := by
-          -- rewrite to (j = i) to use simp
           simp
         simp [hsum_eq]
       have : (∑ j, |(1 : Matrix n n ℝ) i j - (1 : Matrix n n ℝ) i' j|) / 2 ≤ 1 := by
         have h2 : (0 : ℝ) < 2 := by norm_num
-        -- First bound the numerator by 2, then divide by 2 > 0
         have hnum :
             ∑ j, |(1 : Matrix n n ℝ) i j - (1 : Matrix n n ℝ) i' j| ≤ 2 := by
           have hbound :
@@ -467,11 +422,9 @@ lemma dobrushinCoeff_pow [DecidableEq n] (P : Matrix n n ℝ) [Nonempty n] (hP :
                 ≤ (∑ j, |(1 : Matrix n n ℝ) i j|) + (∑ j, |(1 : Matrix n n ℝ) i' j|) := by
             simpa [sum_add_distrib] using hsum_le
           have hx : (∑ j, |(1 : Matrix n n ℝ) i j|) + (∑ j, |(1 : Matrix n n ℝ) i' j|) = (2 : ℝ) := by
-            -- reduce to 1 + 1 = 2
             have h12 : (1 : ℝ) + 1 = 2 := by norm_num
             simpa [hsum_abs_one i, hsum_abs_one i'] using h12
           simpa [hx] using hbound
-        -- Divide the inequality by 2 > 0
         exact (div_le_iff h2).mpr (by simpa [one_mul] using hnum)
       simpa [tvDist, rowDist] using this
     let fId : (n × n) → ℝ :=
@@ -491,8 +444,7 @@ lemma dobrushinCoeff_pow [DecidableEq n] (P : Matrix n n ℝ) [Nonempty n] (hP :
       · intro h; rcases h with ⟨⟨i, i'⟩, rfl⟩; exact ⟨i, i', rfl⟩
     have : sSup (Set.range fId) ≤ 1 := csSup_le hnonempty hforall
     simpa [dobrushinCoeff, pow_zero, rowDist, hset_eqId] using this
-  · -- step: δ(P^(k+1)) ≤ δ(P^k) * δ(P) ≤ (δ P)^(k+1)
-    have hPow : IsStochastic (P^k) := by
+  · have hPow : IsStochastic (P^k) := by
       simpa using (isStochastic_pow (P := P) (hP := hP) k)
     have hmul :
         dobrushinCoeff (P^(k+1)) ≤ dobrushinCoeff (P^k) * dobrushinCoeff P := by
@@ -517,7 +469,6 @@ lemma tvDist_eq_one_sub_sum_min
     (hu1 : ∑ j, u j = 1) (hv1 : ∑ j, v j = 1) :
     Matrix.tvDist u v = 1 - ∑ j, min (u j) (v j) := by
   classical
-  -- pointwise identity for nonnegative a,b
   have habs (a b : ℝ) (ha : 0 ≤ a) (hb : 0 ≤ b) :
       |a - b| = a + b - 2 * min a b := by
     by_cases h : a ≤ b
@@ -535,14 +486,12 @@ lemma tvDist_eq_one_sub_sum_min
         |a - b| = a - b := abs_of_nonneg hnonneg
         _ = a + b - 2 * b := by ring
         _ = a + b - 2 * min a b := by simp [hmin]
-  -- sum the pointwise identity
   have hsum_abs :
       ∑ j, |u j - v j|
         = ∑ j, (u j + v j - 2 * min (u j) (v j)) := by
     apply sum_congr rfl
     intro j _
     exact habs (u j) (v j) (hu0 j) (hv0 j)
-  -- compute the tv distance using the summed identity
   have h2ne : (2 : ℝ) ≠ 0 := by norm_num
   have hdiv :
       (∑ j, |u j - v j|) / 2
@@ -558,7 +507,6 @@ lemma tvDist_eq_one_sub_sum_min
       _ = (2 - 2 * ∑ j, min (u j) (v j)) / 2 := by
                 simp only [hu1, hv1, one_add_one_eq_two]
       _ = 1 - ∑ j, min (u j) (v j) := by
-                -- (2 - 2M)/2 = (2/2) - (2M)/2 = 1 - M
                 have := sub_div (2 : ℝ) (2 * ∑ j, min (u j) (v j)) (2 : ℝ)
                 simpa [h2ne, mul_comm, mul_left_comm, mul_assoc] using this
   simpa [Matrix.tvDist] using hdiv
@@ -573,22 +521,18 @@ lemma dobrushinCoeff_pow_lt_one_of_primitive
     ∃ k > 0, Matrix.dobrushinCoeff (P^k) < 1 := by
   classical
   rcases h_prim with ⟨h_nonneg, ⟨k, hk_pos, hpos⟩⟩
-  -- P^k is stochastic, hence rows are probability vectors.
   have hPk : IsStochastic (P^k) := by
     simpa using (isStochastic_pow (P := P) (hP := h_stoch) k)
-  -- Pick β = minimal entry of P^k over all (i,j).
   let s : Finset (n × n) := (Finset.univ.product Finset.univ)
   obtain ⟨p0, hp0_mem, hmin⟩ :=
     Finset.exists_min_image (s := s) (f := fun p : n×n => (P^k) p.1 p.2)
       (by
-        -- nonempty set of indices
         refine (Finset.univ_nonempty.product Finset.univ_nonempty))
   let β : ℝ := (P^k) p0.1 p0.2
   have hβ_pos : 0 < β := hpos p0.1 p0.2
   have hβ_le (i j : n) : β ≤ (P^k) i j := by
     have hij_mem : (i, j) ∈ s := by simp [s]
     exact hmin (i, j) hij_mem
-  -- For any two rows i,i', the overlap is ≥ card n * β
   have h_overlap (i i' : n) :
       ∑ j, min ((P^k) i j) ((P^k) i' j) ≥ (Fintype.card n : ℝ) * β := by
     have hpoint : ∀ j, β ≤ min ((P^k) i j) ((P^k) i' j) := by
@@ -596,22 +540,17 @@ lemma dobrushinCoeff_pow_lt_one_of_primitive
       have h1 := hβ_le i j
       have h2 := hβ_le i' j
       exact le_min_iff.mpr ⟨h1, h2⟩
-    -- sum of a pointwise lower bound
     have : ∑ j, (β : ℝ) ≤ ∑ j, min ((P^k) i j) ((P^k) i' j) :=
       sum_le_sum (by intro j _; exact hpoint j)
-    -- ∑ const = card • β = card * β
     simpa [Finset.sum_const, Finset.card_univ, nsmul_eq_mul, mul_comm, mul_left_comm, mul_assoc]
       using this
-  -- TV distance between any two rows of P^k ≤ 1 - card n * β < 1
   have hpair (i i' : n) :
       Matrix.tvDist (Matrix.rowDist (P^k) i) (Matrix.rowDist (P^k) i')
         ≤ 1 - (Fintype.card n : ℝ) * β := by
-    -- rows are nonnegative and sum to 1
     have hi0 : ∀ j, 0 ≤ (P^k) i j := by intro j; exact (hPk.1 i j)
     have hi'0 : ∀ j, 0 ≤ (P^k) i' j := by intro j; exact (hPk.1 i' j)
     have hi1 : ∑ j, (P^k) i j = 1 := by simpa [Matrix.rowDist] using hPk.2 i
     have hi'1 : ∑ j, (P^k) i' j = 1 := by simpa [Matrix.rowDist] using hPk.2 i'
-    -- TV identity plus overlap lower bound
     have := tvDist_eq_one_sub_sum_min
       (u := Matrix.rowDist (P^k) i) (v := Matrix.rowDist (P^k) i')
       (hu0 := hi0) (hv0 := hi'0) (hu1 := hi1) (hv1 := hi'1)
@@ -619,11 +558,9 @@ lemma dobrushinCoeff_pow_lt_one_of_primitive
             = 1 - ∑ j, min ((P^k) i j) ((P^k) i' j) := by
       simpa [Matrix.rowDist] using this
     have hover := h_overlap i i'
-    -- 1 - ∑min ≤ 1 - card*β
     have : Matrix.tvDist (Matrix.rowDist (P^k) i) (Matrix.rowDist (P^k) i')
             ≤ 1 - (Fintype.card n : ℝ) * β := by
       rw [this]
-      -- monotonicity of (x ↦ 1 - x)
       have h_mono : 1 - ∑ j, min ((P^k) i j) ((P^k) i' j)
                 ≤ 1 - (Fintype.card n : ℝ) * β := by
         exact sub_le_sub_left hover 1
@@ -648,7 +585,6 @@ lemma dobrushinCoeff_pow_lt_one_of_primitive
     have : sSup (Set.range fPk) ≤ 1 - (Fintype.card n : ℝ) * β :=
       csSup_le hnonempty hforall
     simpa [Matrix.dobrushinCoeff, hset_eq] using this
-  -- Strictness: (Fintype.card n) * β > 0 ⇒ RHS < 1
   have hcard_pos : 0 < (Fintype.card n : ℝ) := by
     have : (0 : ℕ) < Fintype.card n := Fintype.card_pos_iff.mpr ‹Nonempty n›
     exact_mod_cast this
