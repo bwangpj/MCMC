@@ -7,6 +7,8 @@ open Matrix Finset-- Real
 
 variable {n : Type*} [Fintype n] --[DecidableEq n]
 
+-- here we need to make the defs consistent with the one in Kernel
+
 def IsReversible (P : Matrix n n ℝ) (π : stdSimplex ℝ n) : Prop :=
   ∀ i j, π.val i * P i j = π.val j * P j i
 
@@ -62,10 +64,6 @@ noncomputable def metropolisHastingsKernel [DecidableEq n] (π : stdSimplex ℝ 
   let rejection_mass := fun x => 1 - ∑ y, P_proposal x y
   -- The final kernel.
   fun x y => P_proposal x y + (if x = y then rejection_mass x else 0)
-
-/-!
-### Pillar 3.2: Theoretical Insight - Reversibility and Stochasticity
--/
 
 variable {π : stdSimplex ℝ n} {Q : Matrix n n ℝ}
 
