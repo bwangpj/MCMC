@@ -1,5 +1,5 @@
-import PhysLean.StatisticalMechanics.SpinGlasses.Mathematics.LinearAlgebra.Matrix.PerronFrobenius.Irreducible
-import PhysLean.StatisticalMechanics.SpinGlasses.Mathematics.Analysis.CstarAlgebra.Classes
+import MCMC.PF.LinearAlgebra.Matrix.PerronFrobenius.Irreducible
+import MCMC.PF.Analysis.CstarAlgebra.Classes
 
 open Quiver.Path
 namespace Matrix

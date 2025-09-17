@@ -1,5 +1,5 @@
 import Mathlib.Combinatorics.Quiver.Path.Weight
-import MCMC.PF.Mathematics.Data.List
+import MCMC.PF.Data.List
 import Mathlib.Data.List.Lemmas
 import Mathlib.Data.List.Nodup
 import Mathlib.Tactic

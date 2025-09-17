@@ -1,4 +1,4 @@
-import MCM.PF.Mathematics.LinearAlgebra.Matrix.PerronFrobenius.Defs
+import MCMC.PF.Mathematics.LinearAlgebra.Matrix.PerronFrobenius.Defs
 
 namespace Quiver
 variable {V : Type*} [Quiver V]
@@ -108,57 +108,41 @@ theorem period_constant_of_strongly_connected (h_sc : IsStronglyConnected (infer
     ∀ i j : V, period i = period j := by
   intro i j
   classical
-  -- pick positive-length paths i ⟶ j and j ⟶ i
   rcases h_sc i j with ⟨⟨p, hp_pos⟩⟩
   rcases h_sc j i with ⟨⟨q, hq_pos⟩⟩
-  -- Show: ∀ k ∈ CycleLengths j, period i ∣ k
   have h_div_j : ∀ k ∈ CycleLengths j, period i ∣ k := by
     intro k hk
     rcases hk with ⟨hk_pos, ⟨c, hc_len⟩⟩
-    -- Let t := length of the i-cycle p ⋅ q
     let t : ℕ := (p.comp q).length
     have ht_pos : 0 < t := by
-      -- 0 < p.length ≤ (p.comp q).length
       have : p.length ≤ (p.comp q).length := by
-        -- length (p ⋅ q) = p.length + q.length ≥ p.length
         simp [Path.length_comp]
       exact lt_of_lt_of_le hp_pos this
     have ht_mem : t ∈ CycleLengths i := by
       refine ⟨ht_pos, ?_⟩
       refine ⟨p.comp q, rfl⟩
     have h_dvd_t : period i ∣ t := (period_spec i).1 _ ht_mem
-    -- Let t' := length of the i-cycle (p ⋅ c) ⋅ q = t + k
     let t' : ℕ := ((p.comp c).comp q).length
     have ht'_pos : 0 < t' := by
-      -- 0 < k ≤ t'
       have hle1 : k ≤ k + q.length := Nat.le_add_right _ _
       have hle2 : k + q.length ≤ p.length + (k + q.length) := Nat.le_add_left _ _
       have hle : k ≤ p.length + (k + q.length) := le_trans hle1 hle2
-      -- rewrite t' = p.length + k + q.length
       have : p.length + k + q.length = t' := by
-        -- normalize associativity/commutativity and use hc_len
         simp [t', Path.length_comp, hc_len, Nat.add_assoc, Nat.add_comm]
-      -- turn ≤ into the desired ≤ for t'
       have hle' : k ≤ t' := by grind
       exact lt_of_lt_of_le hk_pos hle'
     have ht'_mem : t' ∈ CycleLengths i := by
       refine ⟨ht'_pos, ?_⟩
       refine ⟨(p.comp c).comp q, rfl⟩
     have h_dvd_t' : period i ∣ t' := (period_spec i).1 _ ht'_mem
-    -- Use dvd_add_right with t' = t + k
     have : period i ∣ t + k := by
-      -- t' = t + k
       have h_eq : t' = t + k := by
-        -- expand t, t', and rewrite using hc_len and length_comp
         simp [t, t', Path.length_comp, hc_len, Nat.add_assoc, Nat.add_comm]
       simpa [h_eq]
         using h_dvd_t'
-    -- from d ∣ t and d ∣ t + k deduce d ∣ k
     have hk_div : period i ∣ k := (Nat.dvd_add_right h_dvd_t).1 this
     exact hk_div
-  -- hence period j ≤ period i
   have h_le_ji : period j ≤ period i := period_le_of_commonDivisor j h_div_j
-  -- Symmetric argument: swap i ↔ j, p ↔ q
   have h_div_i : ∀ k ∈ CycleLengths i, period j ∣ k := by
     intro k hk
     rcases hk with ⟨hk_pos, ⟨c, hc_len⟩⟩
@@ -202,9 +186,7 @@ noncomputable def index_of_imprimitivity [Fintype V] [Nonempty V] (G : Quiver V)
 def IsAperiodic [Fintype V] [Nonempty V] (G : Quiver V) : Prop :=
   index_of_imprimitivity G = 1
 
-/-!
-# Cyclic Structure and Frobenius Normal Form
--/
+/-! # Cyclic Structure and Frobenius Normal Form -/
 
 /-- A cyclic partition of the vertices with period h.
     The partition is represented by a map from V to Fin h.
@@ -213,8 +195,6 @@ def IsAperiodic [Fintype V] [Nonempty V] (G : Quiver V) : Prop :=
 def IsCyclicPartition {h : ℕ} (h_pos : h > 0) (partition : V → Fin h) : Prop :=
   let succMod : Fin h → Fin h := fun x => ⟨(x.val + 1) % h, Nat.mod_lt _ h_pos⟩
   ∀ i j : V, Nonempty (i ⟶ j) → partition j = succMod (partition i)
-
-/-! ### Small reusable lemmas for cycle membership -/
 
 /-- If the right factor of a composed path has positive length, the composed cycle at `i`
 belongs to `CycleLengths i`. -/
@@ -246,66 +226,43 @@ theorem exists_cyclic_partition_of_strongly_connected [Fintype V] [Nonempty V]
         IsCyclicPartition h_pos partition := by
   intro h_pos
   classical
-  -- Bring a handy name for the period h := index_of_imprimitivity _
   let h := index_of_imprimitivity (inferInstance : Quiver V)
-  -- Work at this specific h in the goal
   change ∃ partition : V → Fin h, IsCyclicPartition h_pos partition
-
-  -- Fix a base vertex i₀ compatible with the definition of `index_of_imprimitivity`
+  -- we fix a base vertex i₀ compatible with the definition of `index_of_imprimitivity`
   let i0 : V := Classical.arbitrary V
-
-  -- For each vertex, choose a positive-length path from i₀ to it
+  -- for each vertex, we choose a positive-length path from i₀ to it
   have hpaths : ∀ v : V, Nonempty { p : Path i0 v // p.length > 0 } := fun v => h_sc i0 v
   let chosen : ∀ v : V, { p : Path i0 v // p.length > 0 } := fun v => Classical.choice (hpaths v)
   let P : ∀ v : V, Path i0 v := fun v => (chosen v).1
   have hPpos : ∀ v : V, (P v).length > 0 := fun v => (chosen v).2
-
-  -- Define the partition by taking path lengths modulo h
+  -- we define the partition by taking path lengths modulo h
   let partition : V → Fin h := fun v => ⟨(P v).length % h, Nat.mod_lt _ h_pos⟩
   refine ⟨partition, ?_⟩
-
-  -- Prove the cyclic edge condition
-  dsimp [IsCyclicPartition]  -- unfold the predicate (introduces succMod locally)
+  dsimp [IsCyclicPartition]
   intro i j hij
-  -- Choose any edge e : i ⟶ j
   rcases hij with ⟨e⟩
-
-  -- Choose a positive-length path from j back to i₀ to close cycles
   obtain ⟨⟨s, hs_pos⟩⟩ := h_sc j i0
-
-  -- Two cycles at i₀: (P j) ⋅ s and ((P i) ⋅ e) ⋅ s
-  -- membership in `CycleLengths i0`
   have hc1_mem : ((P j).comp s).length ∈ CycleLengths i0 :=
     mem_CycleLengths_of_comp_right (p := P j) (s := s) hs_pos
   have hc2_mem : (((P i).cons e).comp s).length ∈ CycleLengths i0 :=
     mem_CycleLengths_of_cons_comp_right (p := P i) (e := e) (s := s) hs_pos
-
-  -- h divides both lengths since h = period i₀ definitionally (via index_of_imprimitivity)
   have hdvd1 : h ∣ ((P j).comp s).length := by
-    -- use that period i₀ divides lengths of all cycles at i₀
     have : period i0 ∣ ((P j).comp s).length :=
       (divides_cycle_length (i := i0) (k := ((P j).comp s).length)) hc1_mem
-    -- rewrite the goal `h ∣ _` to `period i0 ∣ _`
     simpa [index_of_imprimitivity, i0]
   have hdvd2 : h ∣ (((P i).cons e).comp s).length := by
     have : period i0 ∣ (((P i).cons e).comp s).length :=
       (divides_cycle_length (i := i0) (k := (((P i).cons e).comp s).length)) hc2_mem
     simpa [index_of_imprimitivity, i0]
-
-  -- Convert cycle lengths to explicit sums
   have len_c1 :
       ((P j).comp s).length = (P j).length + s.length := by
     simp [Path.length_comp]
   have len_c2 :
       (((P i).cons e).comp s).length = (P i).length + 1 + s.length := by
     simp [Path.length_comp, Path.length_cons, Nat.add_assoc]
-
-  -- Congruence of the two cycle lengths modulo h
   have hsum_congr :
       Nat.ModEq h ((P j).length + s.length) ((P i).length + 1 + s.length) := by
-    -- both sides are ≡ 0 [MOD h], hence congruent
     have h1 : Nat.ModEq h ((P j).length + s.length) 0 := by
-      -- a % h = 0 from divisibility
       have : ((P j).length + s.length) % h = 0 := by
         simpa [len_c1] using Nat.mod_eq_zero_of_dvd hdvd1
       simpa [Nat.ModEq] using this
@@ -314,21 +271,13 @@ theorem exists_cyclic_partition_of_strongly_connected [Fintype V] [Nonempty V]
         simpa [len_c2] using Nat.mod_eq_zero_of_dvd hdvd2
       simpa [Nat.ModEq] using this
     exact h1.trans h2.symm
-
-  -- Cancel the common "+ s.length"
   have h_congr :
       Nat.ModEq h (P j).length ((P i).length + 1) := by
-    -- using add-right-cancellation for congruences
     dsimp [Nat.add_assoc]
     exact Nat.ModEq.add_right_cancel' s.length hsum_congr
-
-  -- Conclude equality in Fin h via equality of remainders
-  -- Build the "succ" on Fin h used in the predicate
   let succMod : Fin h → Fin h := fun x => ⟨(x.val + 1) % h, Nat.mod_lt _ h_pos⟩
   apply Fin.ext
-  -- Compare values modulo h on both sides
-  simp [partition]  -- reduce to the mod equality
-  -- solve the modular equality using congruence and arithmetic of mod
+  simp [partition]
   calc
     (P j).length % h
         = ((P i).length + 1) % h := by

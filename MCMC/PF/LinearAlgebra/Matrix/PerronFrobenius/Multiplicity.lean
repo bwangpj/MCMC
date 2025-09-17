@@ -1,5 +1,5 @@
 import Mathlib.Order.CompletePartialOrder
-import PhysLean.StatisticalMechanics.SpinGlasses.Mathematics.LinearAlgebra.Matrix.PerronFrobenius.Dominance
+import MCMC.PF.LinearAlgebra.Matrix.PerronFrobenius.Dominance
 
 namespace Matrix
 open Finset CollatzWielandt LinearMap

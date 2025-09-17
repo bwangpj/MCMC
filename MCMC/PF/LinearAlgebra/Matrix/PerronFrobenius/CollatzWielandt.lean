@@ -1,5 +1,5 @@
-import PhysLean.StatisticalMechanics.SpinGlasses.Mathematics.LinearAlgebra.Matrix.PerronFrobenius.Lemmas
-import PhysLean.StatisticalMechanics.SpinGlasses.Mathematics.aux
+import MCMC.PF.LinearAlgebra.Matrix.PerronFrobenius.Lemmas
+import MCMC.PF.aux
 import Mathlib.Data.Matrix.Basic
 namespace Matrix
 open Finset Quiver Matrix

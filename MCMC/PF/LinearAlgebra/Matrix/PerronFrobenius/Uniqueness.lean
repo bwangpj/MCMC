@@ -1,4 +1,4 @@
-import PhysLean.StatisticalMechanics.SpinGlasses.Mathematics.LinearAlgebra.Matrix.PerronFrobenius.Primitive
+import MCMC.PF.LinearAlgebra.Matrix.PerronFrobenius.Primitive
 
 /-!
 # Perron-Frobenius Theorem: Uniqueness of the Eigenvector

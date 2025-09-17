@@ -1,5 +1,5 @@
 import Mathlib
-import MCMC.PF.Mathematics.LinearAlgebra.Matrix.PerronFrobenius.Multiplicity
+import MCMC.PF.LinearAlgebra.Matrix.PerronFrobenius.Multiplicity
 import MCMC.Finite.Core
 
 noncomputable section

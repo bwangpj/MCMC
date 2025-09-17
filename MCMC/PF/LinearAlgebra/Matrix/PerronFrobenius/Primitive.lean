@@ -1,5 +1,5 @@
-import PhysLean.StatisticalMechanics.SpinGlasses.Mathematics.LinearAlgebra.Matrix.PerronFrobenius.CollatzWielandt
-import PhysLean.StatisticalMechanics.SpinGlasses.Mathematics.LinearAlgebra.Matrix.PerronFrobenius.Lemmas
+import MCMC.PF.LinearAlgebra.Matrix.PerronFrobenius.CollatzWielandt
+import MCMC.PF.LinearAlgebra.Matrix.PerronFrobenius.Lemmas
 import Mathlib.Tactic
 
 namespace Matrix

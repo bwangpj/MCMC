@@ -1,6 +1,6 @@
-import PhysLean.StatisticalMechanics.SpinGlasses.Mathematics.aux
-import PhysLean.StatisticalMechanics.SpinGlasses.Mathematics.Combinatorics.Quiver.Path
-import PhysLean.StatisticalMechanics.SpinGlasses.Mathematics.Topology.Compactness.ExtremeValueUSC
+import MCMC.PF.aux
+import MCMC.PF.Combinatorics.Quiver.Path
+import MCMC.PF.Topology.Compactness.ExtremeValueUSC
 import Mathlib.Algebra.Lie.OfAssociative
 import Mathlib.Algebra.Order.Ring.Star
 import Mathlib.Analysis.Normed.Field.Instances
