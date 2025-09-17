@@ -2,7 +2,7 @@ import Mathlib.Algebra.BigOperators.Field
 import Mathlib.Algebra.EuclideanDomain.Basic
 import Mathlib.Algebra.EuclideanDomain.Field
 import Mathlib.Analysis.CStarAlgebra.Classes
-import PhysLean.StatisticalMechanics.SpinGlasses.Mathematics.aux
+import MCMC.PF.aux
 
 open Finset Real Complex Matrix
 

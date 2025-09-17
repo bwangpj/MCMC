@@ -36,7 +36,7 @@ open Topology Metric Set Finset
 section PerronFrobenius
 open Finset Set IsCompact Topology Matrix
 
-variable [Fintype n]  {A : Matrix n n ℝ}
+variable {n : Type*} [Fintype n] {A : Matrix n n ℝ}
 
 lemma ratio_le_max_row_sum_simple [Nonempty n]  (A : Matrix n n ℝ) (hA_nonneg : ∀ i j, 0 ≤ A i j)
     {x : n → ℝ} (_ : ∀ i, 0 ≤ x i) (i : n) (hx_i_pos : 0 < x i) :

@@ -1,6 +1,7 @@
 import MCMC.PF.LinearAlgebra.Matrix.PerronFrobenius.Lemmas
 import MCMC.PF.aux
 import Mathlib.Data.Matrix.Basic
+
 namespace Matrix
 open Finset Quiver Matrix
 variable {n : Type*} [Fintype n]
@@ -243,7 +244,7 @@ lemma exists_mulVec_eq_zero_on_support_of_nonpos [Fintype n]
   obtain ⟨b, hb_mem, hb_eq⟩ := Finset.exists_mem_eq_inf' h_supp_nonempty (fun i => (A *ᵥ v) i / v i)
   have h_ratio_zero : (A *ᵥ v) b / v b = 0 := by rw [← hb_eq, r_eq_zero]
   have h_vb_pos : 0 < v b := by simpa [Set.mem_toFinset] using hb_mem
-  exact ⟨b, hb_mem, mulVec_eq_zero_of_ratio_zero b h_vb_pos h_ratio_zero⟩
+  grind
 
 omit [Nonempty n] in
 lemma le_any_ratio [DecidableEq n] (A : Matrix n n ℝ)

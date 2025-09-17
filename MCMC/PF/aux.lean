@@ -5,7 +5,7 @@ import Mathlib.Analysis.Normed.Order.Lattice
 import Mathlib.Analysis.RCLike.Basic
 import Mathlib.Data.Matrix.Mul
 import Mathlib.Topology.Semicontinuous
-import MCMC.PF.Mathematics.LinearAlgebra.Matrix.Spectrum
+import MCMC.PF.LinearAlgebra.Matrix.Spectrum
 
 open Filter Set Finset Matrix Topology Convex
 
@@ -95,8 +95,6 @@ lemma lowerSemicontinuousOn_eventually_gt_ultrafilter
     (hG : (G : Filter X) ≤ 𝓝[s] x) {y' : Y} (hy' : y' < f x) :
     ∀ᶠ (z : X) in (G : Filter X), y' < f z :=
   hG (hf x hx y' hy')
-
-
 
 /-!
 ## Standard Simplex Properties
@@ -258,7 +256,7 @@ theorem exists_pos_of_sum_one_of_nonneg {n : Type*} [Fintype n] [Nonempty n] {x 
   exact absurd this (by norm_num)
 
 -- Existence of non-zero element in non-zero vector
-theorem exists_ne_zero_of_ne_zero [Fintype n] [Nonempty n] {n : Type*} {x : n → ℝ} (hx : x ≠ 0) : ∃ j, x j ≠ 0 := by
+theorem exists_ne_zero_of_ne_zero {n : Type*} [Fintype n] [Nonempty n] {x : n → ℝ} (hx : x ≠ 0) : ∃ j, x j ≠ 0 := by
   by_contra h
   push_neg at h
   have h_all_zero : ∀ i, x i = 0 := h
@@ -406,10 +404,10 @@ lemma Finset.inf'_eq_ciInf {α β} [ConditionallyCompleteLinearOrder β] {s : Fi
   simp [Set.mem_image, Set.mem_range]
 
 /-- The standard simplex is a closed set. -/
-lemma isClosed_stdSimplex' [Fintype n] : IsClosed (stdSimplex ℝ n) := by
+lemma isClosed_stdSimplex' {n : Type*} [Fintype n] : IsClosed (stdSimplex ℝ n) := by
   have h₁ : IsClosed (⋂ i, {x : n → ℝ | 0 ≤ x i}) :=
     isClosed_iInter (fun i ↦ isClosed_le continuous_const (continuous_apply i))
-  have h_set_eq : {x : n → ℝ | ∀ i, 0 ≤ x i} = ⋂ i, {x | 0 ≤ x i} := by { ext; simp }
+  have h_set_eq : {x : n → ℝ | ∀ i, 0 ≤ x i} = ⋂ i, {x | 0 ≤ x i} := by ext; simp
   rw [← h_set_eq] at h₁
   have h₂ : IsClosed {x : n → ℝ | ∑ i, x i = 1} :=
     isClosed_eq (continuous_finset_sum _ (fun i _ ↦ continuous_apply i)) continuous_const
@@ -423,20 +421,20 @@ lemma abs_le_of_le_of_neg_le {x y : ℝ} (h_le : x ≤ y) (h_neg_le : -x ≤ y) 
 
 /-- A sum over a finset can be split into the value at a point `a`
 and the sum over the rest of the finset. -/
-lemma sum_add_sum_erase {M : Type*} [AddCommMonoid M] [DecidableEq n] {s : Finset n} {f : n → M}
+lemma sum_add_sum_erase {n M : Type*} [AddCommMonoid M] [DecidableEq n] {s : Finset n} {f : n → M}
     (a : n) (ha : a ∈ s) :
     f a + ∑ i ∈ s.erase a, f i = ∑ i ∈ s, f i := by
   rw [add_sum_erase s f ha]
 
 /-- A finset `s` is disjoint from its right complement. -/
 @[simp]
-lemma Finset.disjoint_compl_right [Fintype n] [DecidableEq n] {s : Finset n} :
+lemma Finset.disjoint_compl_right {n : Type*} [Fintype n] [DecidableEq n] {s : Finset n} :
     Disjoint s (univ \ s) := by
   rw [@Finset.disjoint_iff_inter_eq_empty]
   rw [@inter_sdiff_self]
 
 /-- The standard simplex is bounded. -/
-lemma bounded_stdSimplex' [Fintype n] [DecidableEq n] : Bornology.IsBounded (stdSimplex ℝ n) := by
+lemma bounded_stdSimplex' {n : Type*} [Fintype n] [DecidableEq n] : Bornology.IsBounded (stdSimplex ℝ n) := by
   rw [Metric.isBounded_iff_subset_closedBall 0]
   use 1
   intro v hv
@@ -447,9 +445,11 @@ lemma bounded_stdSimplex' [Fintype n] [DecidableEq n] : Bornology.IsBounded (std
     have h_sum_others_nonneg : 0 ≤ ∑ j ∈ univ.erase i, v j :=
       sum_nonneg fun j _ => hv.1 j
     have h_split : ∑ j ∈ univ, v j = v i + ∑ j ∈ univ.erase i, v j := by
-      simp_all only [Finset.mem_univ, sum_erase_eq_sub, sub_nonneg, add_sub_cancel]
+      rw [add_sum_erase _ _ (mem_univ i)]
     linarith [hv.2, h_split, h_sum_others_nonneg]
   exact abs_le_of_le_of_neg_le h_le_one (by linarith [hv.1 i])
+
+variable {n : Type*}
 
 /-- For a vector on the standard simplex, if the sum of a subset of its components is 1,
     then the components outside that subset must be zero. -/
@@ -460,7 +460,7 @@ lemma mem_supp_of_sum_eq_one [Fintype n] [DecidableEq n] {v : n → ℝ} (hv : v
   by_contra hi_not_in_S
   have h_sum_all : ∑ j, v j = 1 := hv.2
   have h_sum_split : ∑ j, v j = (∑ j ∈ S, v j) + (∑ j ∈ Sᶜ, v j) := by
-    rw [@sum_add_sum_compl]
+    rw [Finset.sum_add_sum_compl S v]
   rw [← h_sum, h_sum_split] at h_sum_all
   have h_sum_compl_zero : ∑ j ∈ Sᶜ, v j = 0 := by linarith
   have h_nonneg : ∀ j ∈ Sᶜ, 0 ≤ v j := fun j _ ↦ hv.1 j
@@ -475,7 +475,7 @@ lemma exists_pos_of_ne_zero [Fintype n] [DecidableEq n] {v : n → ℝ} (h_nonne
   by_contra h_all_nonpos
   apply h_ne_zero
   ext i
-  exact le_antisymm (by simp_all only [ne_eq, not_exists, not_lt, Pi.zero_apply]) (h_nonneg i)
+  exact le_antisymm (by simp_all) (h_nonneg i)
 
 /-- A set is nonempty if and only if its finite conversion is nonempty. -/
 lemma Set.toFinset_nonempty_iff {α : Type*} [Fintype α] [DecidableEq α] (s : Set α) [Finite s] [Fintype s] :
@@ -498,8 +498,8 @@ lemma le_div_iff {a b c : ℝ} (hb : 0 < b) : a ≤ c * b ↔ a / b ≤ c := by
   rw [←div_le_iff hb]
 
 /-- The ratio (A *ᵥ v) i / v i is nonnegative when A has nonnegative entries and v is nonnegative -/
-lemma ratio_nonneg [Fintype n] (hA_nonneg : ∀ i j, 0 ≤ A i j) {v : n → ℝ} (hv_nonneg : ∀ i, 0 ≤ v i)
-    (i : n) (hv_pos : 0 < v i) : 0 ≤ (A *ᵥ v) i / v i :=
+lemma ratio_nonneg [Fintype n] (A : Matrix n n ℝ) (hA_nonneg : ∀ i j, 0 ≤ A i j) {v : n → ℝ}
+    (hv_nonneg : ∀ i, 0 ≤ v i) (i : n) (hv_pos : 0 < v i) : 0 ≤ (A *ᵥ v) i / v i :=
   div_nonneg (Finset.sum_nonneg fun j _ => mul_nonneg (hA_nonneg i j) (hv_nonneg j)) hv_pos.le
 
 lemma Finset.inf'_pos {α : Type*} {s : Finset α} (hs : s.Nonempty)
@@ -573,7 +573,7 @@ lemma Function.exists_ne_zero_of_ne_zero {α β} [Zero β] {f : α → β} (h : 
   exact hf x
 
 /-- If the ratio (A *ᵥ v) i / v i = 0 and v i > 0, then (A *ᵥ v) i = 0. -/
-lemma mulVec_eq_zero_of_ratio_zero [Fintype n] {v : n → ℝ} (i : n) (hv_pos : 0 < v i)
+lemma mulVec_eq_zero_of_ratio_zero [Fintype n] (A : Matrix n n ℝ) {v : n → ℝ} (i : n) (hv_pos : 0 < v i)
     (h_ratio_zero : (A *ᵥ v) i / v i = 0) :
     (A *ᵥ v) i = 0 := by
   rw [div_eq_zero_iff] at h_ratio_zero
@@ -593,8 +593,8 @@ lemma mul_vec_mul_vec
 
 /-- If `A *ᵥ v` is zero on the support `S` of `v`, then for any `i ∈ S`, `A i k` must be zero
 for all `k` where `v` is positive (i.e., `k ∈ S`). -/
-lemma zero_block_of_mulVec_eq_zero [Fintype n] (hA_nonneg : ∀ i j, 0 ≤ A i j) {v : n → ℝ} (hv_nonneg : ∀ i, 0 ≤ v i)
-    (S : Set n) (hS_def : S = {i | 0 < v i})
+lemma zero_block_of_mulVec_eq_zero [Fintype n] (A : Matrix n n ℝ) (hA_nonneg : ∀ i j, 0 ≤ A i j)
+    {v : n → ℝ} (hv_nonneg : ∀ i, 0 ≤ v i) (S : Set n) (hS_def : S = {i | 0 < v i})
     (h_Av_zero : ∀ i ∈ S, (A *ᵥ v) i = 0) :
     ∀ i ∈ S, ∀ k ∈ S, A i k = 0 := by
   intro i hi_S k hk_S
@@ -662,8 +662,9 @@ lemma le_csSup_of_mem {α : Type*} {f : α → ℝ} {s : Set α} (hs_bdd : BddAb
   f y ≤ sSup (f '' s) :=
 le_csSup hs_bdd (Set.mem_image_of_mem f hy)
 
-lemma div_lt_iff (hc : 0 < c) : b / c < a ↔ b < a * c :=
-  lt_iff_lt_of_le_iff_le (by exact Nat.le_div_iff_mul_le hc)
+lemma div_lt_iff {a b c : ℝ} (hc : 0 < c) : b / c < a ↔ b < a * c :=
+  lt_iff_lt_of_le_iff_le (by exact le_div_iff₀ hc)
+
 
 --lemma lt_div_iff (hc : 0 < c) : a < b / c ↔ a * c < b :=
 --  lt_iff_lt_of_le_iff_le (div_le_iff hc)

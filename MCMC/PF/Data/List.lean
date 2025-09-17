@@ -208,7 +208,7 @@ lemma count_ge_two_of_mem_head_and_tail {l : List α} {x : α}
 
 omit [DecidableEq α] in
 /-- A list with its head not in its tail has no duplicates if its tail has no duplicates -/
-lemma nodup_of_head_not_mem_tail{l : List α}
+lemma nodup_of_head_not_mem_tail   {l : List α} {x : α}
     (h_nonempty : l ≠ []) (h_head : l.head h_nonempty = x) (h_not_in_tail : x ∉ l.tail) (h_nodup_tail : l.tail.Nodup) : l.Nodup := by
   cases l with
   | nil => contradiction

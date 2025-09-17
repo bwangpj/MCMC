@@ -563,8 +563,7 @@ lemma spectralRadius_le_nnnorm {𝕜 A : Type*} [NontriviallyNormedField 𝕜]
 
 -- Specialized version for continuous linear maps
 lemma spectralRadius_le_nnnorm_continuousLinearMap {E : Type*} [NormedAddCommGroup E]
-    [NormedSpace ℝ E] [CompleteSpace E] [NontriviallyNormedField 𝕜]  [NormOneClass (E →L[ℝ] E)]
-    [SeminormedRing A] [NormedAlgebra 𝕜 A] [CompleteSpace A] [NormOneClass A] (T : E →L[ℝ] E) :
+    [NormedSpace ℝ E] [CompleteSpace E] [NormOneClass (E →L[ℝ] E)] (T : E →L[ℝ] E) :
     spectralRadius ℝ T ≤ ↑‖T‖₊ := by
   exact spectralRadius_le_nnnorm T
 

@@ -432,13 +432,13 @@ namespace Quiver
 
 /-- The quiver structure on a subtype is induced by the quiver structure on the original type.
     An arrow from `a : S` to `b : S` exists if an arrow from `a.val` to `b.val` exists. -/
-def inducedQuiver {V : Type u} [Quiver.{v} V] (S : Set V) : Quiver.{v} S :=
+def inducedQuiver {V : Type*} [Quiver V] (S : Set V) : Quiver S :=
   ⟨fun a b => a.val ⟶ b.val⟩
 
 end Quiver
 namespace Quiver.Subquiver
 
-variable {V : Type u} [Quiver.{v} V] (S : Set V)
+variable {V : Type*} [Quiver V] (S : Set V)
 
 attribute [local instance] inducedQuiver
 
@@ -472,12 +472,10 @@ open Quiver.Path
 If a path in the original quiver only visits vertices in a set `S`, it can be lifted
 to a path in the induced subquiver on `S`.
 -/
-def lift_path_to_induced {S : Set n} [DecidablePred (· ∈ S)]  [Quiver V]
-    {i j : n} [Quiver n] (p : Path i j) (hp : ∀ k, k ∈ p.vertices → k ∈ S) :
-    letI : Quiver n := inferInstance
+def lift_path_to_induced {S : Set V} [DecidablePred (· ∈ S)]
+    {i j : V} (p : Path i j) (hp : ∀ k, k ∈ p.vertices → k ∈ S) :
     letI : Quiver S := inducedQuiver S
     Path (⟨i, hp i (start_mem_vertices p)⟩ : S) (⟨j, hp j (end_mem_vertices p)⟩ : S) := by
-  letI : Quiver n := inferInstance
   letI : Quiver S := inducedQuiver S
   induction p with
   | nil => exact Path.nil
@@ -673,7 +671,7 @@ lemma not_strictly_simple_iff_exists_repeated_vertex [DecidableEq V] {a b : V} {
 
 
 /-- Removing a positive-length cycle from a path gives a strictly shorter path with the same endpoints. -/
-lemma remove_cycle_gives_shorter_path [DecidableEq V] {a v : V}
+lemma remove_cycle_gives_shorter_path [DecidableEq V] {a v b : V}
     {p_prefix : Path a v} {p_cycle : Path v v} {p_rest : Path v b}
     (h_cycle_pos : p_cycle.length > 0) :
     (p_prefix.comp p_rest).length < (p_prefix.comp (p_cycle.comp p_rest)).length := by
@@ -965,7 +963,7 @@ theorem isStrictlySimple_of_shortest [DecidableEq V]
   exact (not_le.mpr h_shorter) (h_min p')
 
 /-- The length of a strictly simple path is at most one less than the number of vertices in the graph. -/
-lemma length_le_card_minus_one_of_isSimple [Fintype n] [DecidableEq n] [Quiver n] {a b : n} (p : Path a b) (hp : p.IsStrictlySimple) :
+lemma length_le_card_minus_one_of_isSimple {n : Type*} [Fintype n] [DecidableEq n] [Quiver n] {a b : n} (p : Path a b) (hp : p.IsStrictlySimple) :
     p.length ≤ Fintype.card n - 1 := by
   have h_card_verts : p.vertexFinset.card = p.length + 1 := by
     exact card_vertexFinset_of_isStrictlySimple hp
@@ -1222,7 +1220,7 @@ lemma extracted_cycle_has_positive_length [DecidableEq V] {a v : V}
   · exact Nat.pos_of_ne_zero h_len_zero
 
 /-- Removing a cycle from a path creates a strictly shorter path. -/
-lemma removing_cycle_gives_shorter_path [DecidableEq V] {a : V} {s : Path a a}
+lemma removing_cycle_gives_shorter_path [DecidableEq V] {a v : V} {s : Path a a}
     {q : Path a v} {c : Path v v} {p₂ : Path v a}
     (hp : s = (q.comp c).comp p₂) (hc_pos : c.length > 0) : (q.comp p₂).length < s.length := by
   have h_len_shorter : (q.comp p₂).length = q.length + p₂.length := by

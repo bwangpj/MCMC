@@ -8,7 +8,7 @@ open CollatzWielandt
 open Quiver
 open Matrix Classical Complex
 
-variable {A : Matrix n n ℝ}
+variable {n : Type*} {A : Matrix n n ℝ}
 
 /-- If a property `P` holds for at least one vertex `i₀` and propagates along the edges
 of an irreducible matrix's graph (`P i ∧ A i j > 0 → P j`), then `P` holds for all vertices. -/
@@ -198,7 +198,7 @@ lemma pow_eigenvector_of_eigenvector {R : Type*} [DecidableEq n][CommSemiring R]
                 simp [pow_succ', smul_smul]
 
 
-theorem mul_mulVec [NonUnitalSemiring α] [Fintype m]  [Fintype l]
+theorem mul_mulVec {α : Type*} [NonUnitalSemiring α] {m l : Type*} [Fintype m] [Fintype l]
     (M : Matrix l m α) (N : Matrix m n α) (v : n → α) :
     (M * N) *ᵥ v = M *ᵥ (N *ᵥ v) := by
   ext i

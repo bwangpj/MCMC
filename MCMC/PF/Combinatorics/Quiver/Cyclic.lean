@@ -1,4 +1,4 @@
-import MCMC.PF.Mathematics.LinearAlgebra.Matrix.PerronFrobenius.Defs
+import MCMC.PF.LinearAlgebra.Matrix.PerronFrobenius.Defs
 
 namespace Quiver
 variable {V : Type*} [Quiver V]
@@ -15,8 +15,8 @@ the cyclic structure of irreducible matrices.
     Note: Standard graph theory definition allows length 0 paths, but we work
     with nonnegative matrices and I've already faced the need to include a nonnegativity condition
     to avoid unneccesary complications -/
-def IsStronglyConnected (G : Quiver n) : Prop :=
-  ∀ i j : n, Nonempty { p : Path i j // p.length > 0 }
+def IsStronglyConnected (G : Quiver V) : Prop :=
+  ∀ i j : V, Nonempty { p : Path i j // p.length > 0 }
 
 -- Definition for the set of lengths of cycles at a vertex i.
 -- We require positive length for cycles relevant to periodicity.
