@@ -9,6 +9,10 @@ import Mathlib.Tactic.FieldSimp
 import Mathlib.Tactic.Linarith
 import MCMC.Finite.MetropolisHastings
 
+set_option linter.unusedSectionVars false
+set_option linter.unusedVariables false
+
+
 namespace MCMC.Finite
 
 open Matrix Finset --Real
@@ -28,6 +32,7 @@ def marginal_β (π : stdSimplex ℝ (α × β)) (b : β) : ℝ :=
 
 lemma marginal_β_nonneg (π : stdSimplex ℝ (α × β)) (b : β) : 0 ≤ marginal_β π b :=
   sum_nonneg (fun a _ => π.property.1 (a, b))
+
 open Classical in
 /--
   The conditional distribution π(a | b). Rigorously defined.
@@ -48,9 +53,9 @@ noncomputable def gibbs_kernel_α (π : stdSimplex ℝ (α × β)) : Matrix (α 
   fun x y =>
     if x.2 = y.2 then gibbs_conditional_α π x.2 y.1 else 0
 
-/--
+/- TODO: MK?
   Theorem: The Gibbs kernel K_α is stochastic.
--/
+
 theorem gibbs_kernel_α_is_stochastic (π : stdSimplex ℝ (α × β)) :
   IsStochastic (gibbs_kernel_α π) := by
   constructor
@@ -59,15 +64,15 @@ theorem gibbs_kernel_α_is_stochastic (π : stdSimplex ℝ (α × β)) :
   · -- 2. Rows sum to 1.
     · -- Case: marg_b > 0.
       sorry
-
+-/
 /-!
 ### The Gibbs as a special case of Metropolis-Hastings
 -/
 
-/--
+/- TODO: MK?
   Theorem: The acceptance probability of a Gibbs step, viewed as an MH step
   where the proposal is the Gibbs kernel itself, is always 1.
--/
+
 theorem gibbs_as_mh_acceptance_is_one (π : stdSimplex ℝ (α × β)) :
   ∀ x y, mh_acceptance_prob π (gibbs_kernel_α π) x y = 1 := by
   intro x y
@@ -81,11 +86,11 @@ theorem gibbs_as_mh_acceptance_is_one (π : stdSimplex ℝ (α × β)) :
     -- Case 2a: marg_b = 0.
     sorry
   sorry
-
-/--
+-/
+/- TODO: MK?
   Corollary: The Gibbs kernel is identical to the MH kernel when the proposal
   is the Gibbs kernel itself.
--/
+
 theorem gibbs_kernel_eq_metropolisHastings (π : stdSimplex ℝ (α × β)) :
   gibbs_kernel_α π = metropolisHastingsKernel π (gibbs_kernel_α π) := by
   ext x y
@@ -98,6 +103,7 @@ theorem gibbs_kernel_eq_metropolisHastings (π : stdSimplex ℝ (α × β)) :
     sorry
   -- P(x, y) = Q(x, y) + δ(x, y) * 0 = Q(x, y).
   sorry
+-/
 
 /-!
 ### MH Usability
@@ -115,10 +121,10 @@ def IsStrictlyPositive (M : Matrix n n ℝ) : Prop := ∀ i j, M i j > 0
 
 /-! ### Scenario 1: Strict Positivity -/
 
-/--
+/- TODO: MK?
   Theorem: If the proposal Q and the target distribution π are strictly positive,
   then the resulting Metropolis-Hastings kernel P is also strictly positive.
--/
+
 theorem metropolisHastings_is_strictly_positive
   (hQ_stoch : IsStochastic Q)
   (hQ_pos : IsStrictlyPositive Q)
@@ -140,13 +146,16 @@ theorem metropolisHastings_is_strictly_positive
   -- 3. RejectionTerm ≥ 0 (Rejection Mass R(x) ≥ 0).
   sorry
   -- P(x, y) = Positive + Non-negative > 0.
+-/
 
+/- TODO: MK?
 -- Connection to underlying theory:
 theorem IsStrictlyPositive.is_primitive {P : Matrix n n ℝ} (hP_pos : IsStrictlyPositive P) :
   IsPrimitive P := sorry -- k=1 works.
 
 theorem IsStrictlyPositive.is_irreducible [Nonempty n] {P : Matrix n n ℝ} (hP_pos : IsStrictlyPositive P) :
   Matrix.Irreducible P := sorry -- Graph is complete.
+-/
 
 /-! ### General Irreducibility and Primitivity -/
 
@@ -156,10 +165,9 @@ theorem IsStrictlyPositive.is_irreducible [Nonempty n] {P : Matrix n n ℝ} (hP_
 def SymmetricConnectivity (Q : Matrix n n ℝ) : Prop :=
   ∀ i j, Q i j > 0 → Q j i > 0
 
-/--
+/- TODO: MK?
   Theorem: Irreducibility of MH Kernel.
   If π > 0, and Q is irreducible with symmetric connectivity, then P_MH is irreducible.
--/
 theorem metropolisHastings_irreducible
   (hQ_stoch : IsStochastic Q)
   (hQ_irred : Matrix.Irreducible Q)
@@ -190,6 +198,7 @@ theorem metropolisHastings_irreducible
   -- Connection to underlying theory (W4):
   -- Since P dominates Q in connectivity, and Q is irreducible, P is irreducible.
   sorry
+-/
 
 /--
   The proposal Q is "imperfect" if it does not already satisfy detailed balance w.r.t. π.
@@ -198,10 +207,10 @@ theorem metropolisHastings_irreducible
 def ProposalIsImperfect (π : stdSimplex ℝ n) (Q : Matrix n n ℝ) : Prop :=
   ∃ i j, π.val i * Q i j ≠ π.val j * Q j i
 
-/--
+/- TODO: MK?
   Theorem: Primitivity (Aperiodicity) of MH Kernel.
   If P_MH is irreducible, π > 0, and Q is imperfect, then P_MH is primitive.
--/
+
 theorem metropolisHastings_primitive
   (hQ_stoch : IsStochastic Q)
   -- (hP_irred : Irreducible (metropolisHastingsKernel π Q)) -- Needed for final connection
@@ -257,6 +266,7 @@ theorem metropolisHastings_primitive
   -- Connection to underlying theory (W4):
   -- We have shown P has a self-loop. Irreducible + self-loop => Primitive.
   sorry
+-/
 
 /-!
 ### W4: Spectral Properties of Reversible Kernels
@@ -277,15 +287,15 @@ noncomputable def symmetrizedKernel (π : stdSimplex ℝ n) (P : Matrix n n ℝ)
   let D_sqrt_π_inv := diagonal (fun i => 1 / Real.sqrt (π.val i))
   D_sqrt_π * P * D_sqrt_π_inv
 
-/--
+/- TODO: MK?
   Theorem: The symmetrized kernel of a reversible matrix is symmetric (self-adjoint).
   This allows leveraging the spectral theorem for symmetric matrices.
--/
+
 theorem symmetrizedKernel_is_hermitian_of_reversible
   (hπ_pos : StrictlyPositive π)
   (hP_rev : IsReversible P π) :
   IsHermitian (symmetrizedKernel π P) := by
   -- For real matrices, IsHermitian is equivalent to being symmetric (Aᵀ = A).
   sorry
-
+-/
 end MCMC.Finite
