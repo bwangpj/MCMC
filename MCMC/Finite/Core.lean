@@ -1,4 +1,4 @@
-import PhysLean.StatisticalMechanics.SpinGlasses.Mathematics.LinearAlgebra.Matrix.PerronFrobenius.Stochastic
+import MCMC.PF.Mathematics.LinearAlgebra.Matrix.PerronFrobenius.Stochastic
 namespace MCMC.Finite
 
 open Matrix Finset

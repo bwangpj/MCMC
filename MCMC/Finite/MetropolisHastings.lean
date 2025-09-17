@@ -1,4 +1,4 @@
-import PhysLean.StatisticalMechanics.SpinGlasses.Mathematics.Probability.MCMC.Core
+import MCMC.Finite.Core
 
 
 namespace MCMC.Finite

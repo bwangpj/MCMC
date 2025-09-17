@@ -7,7 +7,7 @@ import Mathlib.Tactic.Positivity
 import Mathlib.Data.Fintype.Card
 import Mathlib.Tactic.FieldSimp
 import Mathlib.Tactic.Linarith
-import PhysLean.StatisticalMechanics.SpinGlasses.Mathematics.Probability.MCMC.MetropolisHastings
+import MCMC.Finite.MetropolisHastings
 
 namespace MCMC.Finite
 

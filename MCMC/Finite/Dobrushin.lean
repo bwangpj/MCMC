@@ -1,6 +1,6 @@
 import Mathlib
-import PhysLean.StatisticalMechanics.SpinGlasses.Mathematics.LinearAlgebra.Matrix.PerronFrobenius.Multiplicity
-import PhysLean.StatisticalMechanics.SpinGlasses.Mathematics.Probability.MCMC.Core
+import MCMC.PF.Mathematics.LinearAlgebra.Matrix.PerronFrobenius.Multiplicity
+import MCMC.Finite.Core
 
 noncomputable section
 open Matrix Finset MCMC.Finite
