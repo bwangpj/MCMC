@@ -109,8 +109,13 @@ lemma unit_of_norm_div_star {z : ℂ} (hz : z ≠ 0) :
   intro u
   have h₁ : (‖z‖ : ℂ) ≠ 0 := by
     simpa using (ofReal_ne_zero.mpr ((norm_ne_zero_iff).2 hz))
-  field_simp [u, h₁]
-  rw [mul_conj']; rw [@sq]
+  calc
+    z * u = z * (star z / (‖z‖ : ℂ)) := rfl
+    _ = (z * star z) / (‖z‖ : ℂ) := by simp [mul_div_assoc]
+    _ = (↑(‖z‖ ^ 2) : ℂ) / (‖z‖ : ℂ) := by rw [star_mul_self]
+    _ = ((‖z‖ : ℂ) ^ 2) / (‖z‖ : ℂ) := by simp [pow_two]
+    _ = (‖z‖ : ℂ) := by
+      simp [pow_two, h₁]
 
 /--
 If `c` is a complex number of norm 1, and `c^k = 1` and `c^(k+1) = 1` for some
@@ -186,8 +191,8 @@ lemma each_term_is_nonneg_real_multiple_of_sum_of_triangle_eq {u : ℂ}
     _ = (‖v i‖ * ‖u‖ : ℂ) * u / (‖u‖ ^ 2 : ℂ) := by rw [h, star_mul_self, ofReal_pow]
     _ = (k : ℂ) * u := by
       rw [ofReal_div, ← ofReal_mul]
+      simp only [ofReal_mul]
       field_simp [norm_ne_zero_iff.mpr h_ne]
-      ring
 
 /--
 If `vi` is a non-negative real multiple `k` of a non-zero vector `u`, then `k` is the
@@ -271,7 +276,12 @@ lemma align_each_with_sum {u : ℂ} {v : ι → ℂ} {s : Finset ι}
   have ⟨k, k_nonneg, hk⟩ :=
     each_term_is_nonneg_real_multiple_of_sum_of_triangle_eq s h_eq h_sum h_ne i hi
   have coeff_mul : k * ‖u‖ = ‖v i‖ := by
-    field_simp [coeff_of_aligned_vector hk k_nonneg h_ne, h_norm_ne_zero]
+    have hk' : k = ‖v i‖ / ‖u‖ := coeff_of_aligned_vector hk k_nonneg h_ne
+    calc
+      k * ‖u‖ = (‖v i‖ / ‖u‖) * ‖u‖ := by simp [hk']
+      _ = ‖v i‖ * (‖u‖ / ‖u‖) := by
+        rw [div_mul_eq_mul_div]; grind
+      _ = ‖v i‖ := by simp [div_self h_norm_ne_zero]
   calc
     (‖u‖ : ℂ) • v i
       = ↑‖u‖ * v i := by simp [smul_eq_mul]
@@ -339,6 +349,7 @@ lemma aligned_of_triangle_eq {u : ℂ} {v : ι → ℂ} {s : Finset ι}
   rw [smul_eq_mul, smul_eq_mul] at h_aligned
   rw [mul_comm] at h_aligned
   field_simp [h_aligned, hu_norm_ne_zero, hvi_norm_ne_zero]
+  assumption
 
 /--
 If a complex number `z` is a positive real multiple of another complex number `w`,
@@ -353,17 +364,30 @@ lemma aligned_of_mul_of_real_pos
   have hz_ne_zero : z ≠ 0 := by
     rw [h, mul_ne_zero_iff]
     exact ⟨ofReal_ne_zero.mpr hc_pos.ne', hw_ne_zero⟩
-  field_simp [ h,
-               norm_mul,
-               norm_ofReal,
-               abs_of_pos hc_pos,
-               norm_ne_zero_iff.mpr hw_ne_zero,
-               norm_ne_zero_iff.mpr hz_ne_zero ]
-  have hc_ne_zero   : (c : ℂ) ≠ 0       := ofReal_ne_zero.mpr hc_pos.ne'
-  have hnormw_ne    : ‖w‖ ≠ 0           := (norm_ne_zero_iff.mpr hw_ne_zero)
-  have hnormw_neC   : (↑‖w‖ : ℂ) ≠ 0    := ofReal_ne_zero.mpr hnormw_ne
-  field_simp [hc_ne_zero, hnormw_neC]
-  ring_nf
+  have hz_norm : ‖z‖ = c * ‖w‖ := by
+    simp [h, abs_of_pos hc_pos]
+  have hz_normC : (↑‖z‖ : ℂ) = (c : ℂ) * (↑‖w‖ : ℂ) := by
+    simpa [ofReal_mul] using congrArg (fun t : ℝ => (t : ℂ)) hz_norm
+  have hnormw_neC : (↑‖w‖ : ℂ) ≠ 0 := ofReal_ne_zero.mpr (norm_ne_zero_iff.mpr hw_ne_zero)
+  have hnormz_neC : (↑‖z‖ : ℂ) ≠ 0 := ofReal_ne_zero.mpr (norm_ne_zero_iff.mpr hz_ne_zero)
+  have hcross : z * (↑‖w‖ : ℂ) = w * (↑‖z‖ : ℂ) := by
+    calc
+      z * (↑‖w‖ : ℂ)
+          = ((c : ℂ) * w) * ↑‖w‖ := by simp [h]
+      _   = (c : ℂ) * (w * ↑‖w‖) := by
+            simp [mul_assoc]
+      _   = w * ((c : ℂ) * ↑‖w‖) := by
+            calc
+              (c : ℂ) * (w * ↑‖w‖)
+                  = ((c : ℂ) * w) * ↑‖w‖ := by
+                        simpa using (mul_assoc (c : ℂ) w (↑‖w‖ : ℂ)).symm
+              _   = (w * (c : ℂ)) * ↑‖w‖ := by
+                        simp [mul_comm]
+              _   = w * ((c : ℂ) * ↑‖w‖) := by
+                        simp [mul_assoc]
+      _   = w * (↑‖z‖ : ℂ) := by
+            simp [hz_normC]
+  exact (div_eq_div_iff hnormz_neC hnormw_neC).2 hcross
 
 /--
 If `z = λw` for a positive real scalar `λ`, then `z` and `w` are aligned.
@@ -387,6 +411,7 @@ lemma aligned_of_triangle_eq' {u : ℂ} {v : ι → ℂ} {s : Finset ι}
   rw [smul_eq_mul, smul_eq_mul] at h_aligned
   rw [mul_comm] at h_aligned
   field_simp [h_aligned, hu_norm_ne_zero, hvi_norm_ne_zero]
+  assumption
 
 
 

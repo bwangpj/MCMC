@@ -331,34 +331,6 @@ lemma ne_of_mem_tail {l : List α} {x : α} (h_nodup : l.Nodup) (h_mem : x ∈ l
   have h_head_not_in_tail := head_not_mem_tail_of_nodup h_nodup h_ne_nil
   contradiction
 
-omit [DecidableEq α] in
-/--
-If the head of a list does not satisfy the predicate `p`, then `findIdx` on that list
-is one greater than `findIdx` on the tail.
--/
-lemma findIdx_cons_of_ne {p : α → Bool} {hd : α} {tl : List α} (h : p hd = false) :
-    findIdx p (hd :: tl) = 1 + findIdx p tl := by
-  unfold findIdx
-  unfold findIdx.go
-  rw [h]
-  induction tl with
-  | nil =>
-    simp only [findIdx.go, zero_add, cond_false, add_zero]
-  | cons hd' tl' ih =>
-    simp only [findIdx.go, zero_add, Nat.reduceAdd, cond_false]
-    by_cases h' : p hd' = true
-    · simp only [h', cond_true, le_refl, Nat.eq_of_le_zero, add_zero]
-    · simp only [h', cond_false]
-      induction tl' with
-      | nil => simp only [findIdx.go, Nat.reduceAdd]
-      | cons a l ih' =>
-        simp [findIdx.go]
-        by_cases ha : p a = true
-        · simp only [ha, cond_true, Nat.reduceAdd]
-        · simp only [ha, cond_false]
-          rw [Nat.one_add]
-          exact findIdx_cons.findIdx_go_succ p l 2
-
 lemma bif_of_false {α : Type*} {p : Bool} {a b : α} (h : p = false) : (bif p then a else b) = b := by
   rw [h]
   rfl
@@ -676,5 +648,33 @@ lemma IsPrefix.eq_of_length_eq {l₁ l₂ l : List α}
   have h_append_eq : l₁ ++ t₁ = l₂ ++ t₂ := by rw [h_eq]
   have h_take_eq := congr_arg (fun l ↦ l.take l₁.length) h_append_eq
   simpa [take_left', h_len] using h_take_eq
+
+omit [DecidableEq α] in
+/--
+If the head of a list does not satisfy the predicate `p`, then `findIdx` on that list
+is one greater than `findIdx` on the tail.
+-/
+lemma findIdx_cons_of_ne {p : α → Bool} {hd : α} {tl : List α} (h : p hd = false) :
+    findIdx p (hd :: tl) = 1 + findIdx p tl := by
+  unfold findIdx
+  unfold findIdx.go
+  rw [h]
+  induction tl with
+  | nil =>
+    simp only [findIdx.go, zero_add, cond_false, add_zero]
+  | cons hd' tl' ih =>
+    simp only [findIdx.go, zero_add, Nat.reduceAdd, cond_false]
+    by_cases h' : p hd' = true
+    · simp only [h', cond_true, le_refl, Nat.eq_of_le_zero, add_zero]
+    · simp only [h', cond_false]
+      induction tl' with
+      | nil => simp only [findIdx.go, Nat.reduceAdd]
+      | cons a l ih' =>
+        simp [findIdx.go]
+        by_cases ha : p a = true
+        · simp only [ha, cond_true, Nat.reduceAdd]
+        · simp only [ha, cond_false]
+          rw [Nat.one_add]
+          exact findIdx_go_succ' p l 2
 
 end List

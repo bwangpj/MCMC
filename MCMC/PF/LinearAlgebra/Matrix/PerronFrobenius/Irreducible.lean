@@ -370,7 +370,6 @@ theorem pft_primitive
               rw [Finset.mul_sum]
         _ = s⁻¹ * s               := by simp [s]
         _ = 1                     := by field_simp [hs_ne]
-
   have hv0_simplex : v0 ∈ stdSimplex ℝ n := ⟨hv0_nonneg, h_sum_v0⟩
   have hv0_pos : ∀ i, 0 < v0 i := by
     intro i
@@ -408,7 +407,6 @@ theorem pft_primitive
       have h_le : c ≤ v0 j / w.1 j :=
         Finset.inf'_le _ (Finset.mem_univ j)
       exact (le_div_iff₀ (hw_pos j)).mp h_le
-
     have h_sum :
         c * (A *ᵥ w.1) i₀ ≤ (A *ᵥ v0) i₀ := by
       dsimp [Matrix.mulVec, dotProduct]
@@ -429,6 +427,7 @@ theorem pft_primitive
       have : c = v0 i₀ / w.1 i₀ := hc_eq
       have w_ne : w.1 i₀ ≠ 0 := ne_of_gt w_i₀_pos
       field_simp [this, w_ne]
+      simp [*]
     have h_r_ge_r' : r ≥ r' := by
       have h_pos : 0 < c * w.1 i₀ := mul_pos hc_pos w_i₀_pos
       have h1 : c * r' * w.1 i₀ ≤ r * v0 i₀ := by
@@ -452,7 +451,6 @@ theorem pft_primitive
       Finset.exists_mem_eq_inf' Finset.univ_nonempty
         (fun i : n => w.1 i / v0 i)
     have v0_j₀_pos : 0 < v0 j₀ := hv0_pos j₀
-
     have w_ge_dv0 : ∀ j, d * v0 j ≤ w.1 j := by
       intro j
       have h_le : d ≤ w.1 j / v0 j :=
@@ -471,7 +469,9 @@ theorem pft_primitive
     have w_j₀_eq : w.1 j₀ = d * v0 j₀ := by
       have : d = w.1 j₀ / v0 j₀ := hd_eq
       have v0_ne : v0 j₀ ≠ 0 := ne_of_gt v0_j₀_pos
-      field_simp [this, v0_ne]
+      simp_all only [gt_iff_lt, sum_def, ne_eq, Pi.smul_apply, smul_eq_mul, inv_pos, mul_nonneg_iff_of_pos_left,
+        mul_pos_iff_of_pos_left, implies_true, div_pos_iff_of_pos_left, mem_univ, ge_iff_le, mul_eq_zero, inv_eq_zero,
+        false_or, isUnit_iff_ne_zero, or_self, not_false_eq_true, IsUnit.div_mul_cancel, s, v0, c, d]
     have h_r'_ge_r : r' ≥ r := by
       have h_pos : 0 < d * v0 j₀ := mul_pos hd_pos v0_j₀_pos
       have h1 : d * r * v0 j₀ ≤ r' * w.1 j₀ := by
