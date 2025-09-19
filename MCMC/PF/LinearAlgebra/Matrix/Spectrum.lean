@@ -459,7 +459,7 @@ lemma spectralRadius_le_nnnorm_of_mem_spectrum {A : Matrix n n ℝ} {μ : ℝ}
     use v
     constructor
     · exact hv_ne_zero
-    · rw [Matrix.sub_mulVec, Matrix.smul_mulVec_assoc, Matrix.one_mulVec, sub_eq_zero] at hv_ker
+    · rw [Matrix.sub_mulVec, Matrix.smul_mulVec, Matrix.one_mulVec, sub_eq_zero] at hv_ker
       exact hv_ker.symm
   obtain ⟨v, hv_ne_zero, hv_eigen⟩ := h_eigenvalue
   have hv_norm_pos : 0 < ‖v‖ := norm_pos_iff.mpr hv_ne_zero
