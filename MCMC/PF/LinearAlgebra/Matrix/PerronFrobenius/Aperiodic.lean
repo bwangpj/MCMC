@@ -1,5 +1,5 @@
-import PhysLean.StatisticalMechanics.SpinGlasses.Mathematics.Combinatorics.Quiver.Cyclic
-import PhysLean.StatisticalMechanics.SpinGlasses.Mathematics.LinearAlgebra.Matrix.PerronFrobenius.Defs
+import MCMC.PF.Combinatorics.Quiver.Cyclic
+import MCMC.PF.LinearAlgebra.Matrix.PerronFrobenius.Defs
 
 open Quiver
 

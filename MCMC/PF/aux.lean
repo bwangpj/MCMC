@@ -313,8 +313,8 @@ theorem mul_div_cancel_pos_right {K : Type*} [Field K] [LinearOrder K] [IsStrict
 -- Non-positive times positive is non-positive
 theorem mul_nonpos_of_nonpos_of_pos {α : Type*} [Ring α] [LinearOrder α] [IsStrictOrderedRing α]
     {a b : α} (ha : a ≤ 0) (hb : 0 < b) : a * b ≤ 0 := by
-  cases' le_iff_eq_or_lt.mp ha with h h
-  · rw [h, zero_mul, ← h]
+  rcases le_iff_eq_or_lt.mp ha with (rfl | h)
+  · rw [zero_mul]
   · exact (mul_neg_of_neg_of_pos h hb).le
 
 -- Continuous infimum over finite index

@@ -774,6 +774,7 @@ lemma phase_eq_of_positive_real_multiple {z w : ℂ} {c : ℝ}
     _ = w * (↑c * ↑‖w‖) := by ring
     _ = w * ↑(c * ‖w‖) := by rw [ofReal_mul]
     _ = w * ↑‖z‖ := by rw [h_z_norm]
+  grind only
 
 lemma aligned_term_of_triangle_eq {ι : Type*} {s : Finset ι} {v : ι → ℂ}
     (h_sum : ‖∑ i ∈ s, v i‖ = ∑ i ∈ s, ‖v i‖)

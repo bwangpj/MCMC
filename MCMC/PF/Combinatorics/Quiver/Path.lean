@@ -274,9 +274,6 @@ lemma vertices_head? {a b : V} (p : Path a b) : p.vertices.head? = some a := by
     simp
     simp_all only [List.isEmpty_iff, Option.getD_some]
 
-@[simp]
-lemma length_toPath {a b : V} (e : a ⟶ b) : (e.toPath).length = 1 := rfl
-
 variable {α : Type*} [DecidableEq α]
 
 @[simp]

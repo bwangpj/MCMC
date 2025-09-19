@@ -1,6 +1,49 @@
-import Mathlib
+--import Mathlib
 import MCMC.PF.LinearAlgebra.Matrix.PerronFrobenius.Multiplicity
 import MCMC.Finite.Core
+
+/-!
+This module formalizes the analytical properties of the Dobrushin coefficient for
+row-stochastic matrices on finite state spaces. The definitions and theorems are
+grounded in the concepts introduced in R. L. Dobrushin's 1956 paper on the
+Central Limit Theorem for nonstationary Markov chains.
+
+The main components are:
+
+-   **Total Variation Distance (`tvDist`):** The module defines the total variation
+    distance as half the L1-norm between two probability vectors. This corresponds
+    to the norm of the difference between two measures, `||μ₁ - μ₂||`, as
+    discussed in the paper (cf. §1.4, eq. 1.10). The formalization includes a proof
+    (`tvDist_eq_one_sub_sum_min`) of the identity `tvDist(u, v) = 1 - ∑ min(uⱼ, vⱼ)`,
+    which directly connects the L1-based definition to the formulation `1 - ᾶ(μ₁, μ₂)`
+    used by Dobrushin (cf. eq. 1.15, 1.16).
+
+-   **Dobrushin Coefficient (`dobrushinCoeff`):** The coefficient `δ(P)` is formalized
+    as the supremum of the total variation distance between any two rows of the
+    stochastic matrix `P`. This quantity is related to Dobrushin's ergodic
+    coefficient `α(P)` by the identity `δ(P) = 1 - α(P)` (cf. eq. 1.5, 1.5'). The
+    paper's definition for denumerable chains (eq. 1.19), `α(Q) = inf ∑ min(qₖₘ, qₗₘ)`,
+    is thus equivalent via the `tvDist_eq_one_sub_sum_min` identity.
+
+-   **Contraction and Submultiplicativity:** The module proves two central properties
+    of the coefficient:
+    1.  The contraction theorem (`tvDist_contract`), which bounds the TV distance
+        between the images of two distributions by `δ(P)` times their initial
+        distance. This is the foundational result that establishes the coefficient's
+        role in measuring convergence.
+    2.  The submultiplicativity of the coefficient (`dobrushinCoeff_mul`), which
+        states `δ(PQ) ≤ δ(P)δ(Q)`. This property corresponds to the inequality
+        `1 - α(P_composed) ≤ Π(1 - α(P_i))` used in the paper's argument for
+        bounding the ergodicity of multi-step transitions (cf. §1.11).
+
+-   **Primitivity and Strict Contraction:** The final theorem in this module,
+    `dobrushinCoeff_pow_lt_one_of_primitive`, establishes a sufficient condition
+    for strict contractivity. It proves that if a stochastic matrix `P` is primitive,
+    there exists a power `k > 0` such that `δ(P^k) < 1`. This provides a
+    concrete combinatorial condition under which the assumptions of uniform
+    ergodicity (i.e., `α(P) > 0` for some transition `P`) used throughout the
+    Dobrushin paper are satisfied in the context of a time-homogeneous chain.
+-/
 
 noncomputable section
 open Matrix Finset MCMC.Finite

@@ -1,3 +1,4 @@
+import MCMC.PF.LinearAlgebra.Matrix.PerronFrobenius.Aperiodic
 import MCMC.PF.LinearAlgebra.Matrix.PerronFrobenius.Stochastic
 namespace MCMC.Finite
 
@@ -123,5 +124,23 @@ theorem isMCMC_of_properties
   irreducible := h_irred,
   primitive := h_prim
 }
+
+omit [Nonempty n] in
+/-- Convenience: aperiodicity follows from primitivity  -/
+theorem aperiodic_of_properties
+    [DecidableEq n] [Nonempty n]
+    (P : Matrix n n ℝ)
+    (h_stoch : IsStochastic P)
+    (h_prim : IsPrimitive P) :
+    Matrix.IsAperiodic P :=
+  Matrix.primitive_implies_irreducible_and_aperiodic (A := P) h_stoch.1 h_prim
+
+omit [Nonempty n] in
+/-- Convenience: expose aperiodicity from an IsMCMC instance. -/
+lemma IsMCMC.aperiodic
+    [DecidableEq n] [Nonempty n]
+    {P : Matrix n n ℝ} {π : stdSimplex ℝ n}
+    (h : IsMCMC P π) : Matrix.IsAperiodic P :=
+  Matrix.primitive_implies_irreducible_and_aperiodic (A := P) h.stochastic.1 h.primitive
 
 end MCMC.Finite

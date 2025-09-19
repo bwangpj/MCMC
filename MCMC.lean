@@ -15,8 +15,6 @@ import MCMC.PF.LinearAlgebra.Matrix.PerronFrobenius.CollatzWielandt
 import MCMC.PF.LinearAlgebra.Matrix.PerronFrobenius.Defs
 import MCMC.PF.LinearAlgebra.Matrix.PerronFrobenius.Dominance
 import MCMC.PF.LinearAlgebra.Matrix.PerronFrobenius.Irreducible
-import MCMC.PF.LinearAlgebra.Matrix.PerronFrobenius.JNF
-import MCMC.PF.LinearAlgebra.Matrix.PerronFrobenius.JordanNormalForm
 import MCMC.PF.LinearAlgebra.Matrix.PerronFrobenius.Lemmas
 import MCMC.PF.LinearAlgebra.Matrix.PerronFrobenius.Multiplicity
 import MCMC.PF.LinearAlgebra.Matrix.PerronFrobenius.Primitive

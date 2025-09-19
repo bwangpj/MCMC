@@ -1,4 +1,5 @@
 import MCMC.Finite.TotalVariation
+import Mathlib.Analysis.Asymptotics.SpecificAsymptotics
 
 set_option linter.unusedSectionVars false
 
@@ -8,11 +9,9 @@ open scoped BigOperators
 
 variable {n : Type*} [Fintype n] [DecidableEq n]
 
-/-!
-### Convergence Theorems
--/
+/-! ### Convergence Theorems -/
 
-/-! #### The Limit Matrix and its Properties -/
+/-! #### The limit matrix -/
 
 /--
   The limit matrix Π. A rank-1 matrix where every row equals the stationary distribution π.
