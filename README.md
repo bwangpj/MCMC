@@ -3,7 +3,7 @@
 Formalization of:
 - finite-state Markov chains (kernels, total variation, convergence),
 - basic MCMC algorithms (Gibbs, Metropolis–Hastings),
-- Perron–Frobenius theory and supporting spectral/JNF material,
+- Perron–Frobenius theory and supporting spectral material,
 - groundwork for a general MCMC kernel interface (non-finite).
 
 ## Build
