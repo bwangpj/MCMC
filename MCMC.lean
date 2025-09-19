@@ -1,14 +1,15 @@
--- import MCMC.Finite.Convergence
+import MCMC.Finite.Convergence
 import MCMC.Finite.Core
-import MCMC.Finite.Dobrushin
+import MCMC.Finite.TotalVariation
 --import MCMC.Finite.Gibbs
 import MCMC.Finite.MetropolisHastings
+import MCMC.Finite.toKernel
 
 import MCMC.PF.aux
 import MCMC.PF.Analysis.CstarAlgebra.Classes
 import MCMC.PF.Combinatorics.Quiver.Cyclic
 import MCMC.PF.Combinatorics.Quiver.Path
-import MCMC.PF.Combinatorics.Data.List
+import MCMC.PF.Data.List
 import MCMC.PF.LinearAlgebra.Matrix.Spectrum
 import MCMC.PF.LinearAlgebra.Matrix.PerronFrobenius.Aperiodic
 import MCMC.PF.LinearAlgebra.Matrix.PerronFrobenius.CollatzWielandt
