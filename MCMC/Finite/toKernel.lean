@@ -21,6 +21,27 @@ noncomputable def matrixToKernel (P : Matrix n n ℝ) (_ : IsStochastic P) :
 noncomputable def vecToMeasure (π : stdSimplex ℝ n) : Measure n :=
   ∑ i : n, (ENNReal.ofReal (π.val i)) • Measure.dirac i
 
+omit [DecidableEq n] in
+private lemma kernel_eval_on_set
+    {P : Matrix n n ℝ} (hP : IsStochastic P) (i : n)
+    (B : Set n) (hB : MeasurableSet B) :
+    (matrixToKernel P hP) i B
+      = ∑ j : n, ENNReal.ofReal (P i j) * B.indicator 1 j := by
+  change ((∑ j : n, ENNReal.ofReal (P i j) • Measure.dirac j) : Measure n) B = _
+  simp [hB, Measure.dirac_apply']
+
+omit [DecidableEq n] in
+private lemma kernel_eval_singleton
+    {P : Matrix n n ℝ} (hP : IsStochastic P) (i j : n) :
+    (matrixToKernel P hP) i {j} = ENNReal.ofReal (P i j) := by
+  have hB : MeasurableSet ({j} : Set n) := measurableSet_singleton j
+  rw [kernel_eval_on_set (P := P) (hP := hP) (i := i) ({j}) hB]
+  rw [Finset.sum_eq_single j]
+  · simp [Set.indicator_of_mem, Set.mem_singleton_iff]
+  · intro b _ hb
+    simp [Set.indicator_of_notMem, hb]
+  · simp
+
 open scoped ENNReal
 
 omit [DecidableEq n] in
@@ -29,7 +50,6 @@ theorem isStationary_iff_invariant (P : Matrix n n ℝ) (π : stdSimplex ℝ n)
   (hP : IsStochastic P) :
   IsStationary P π ↔
   Kernel.Invariant (matrixToKernel P hP) (vecToMeasure π) := by
-  classical
   set κ := matrixToKernel P hP
   set μ := vecToMeasure (n := n) π
   constructor
@@ -127,27 +147,7 @@ theorem isStationary_iff_invariant (P : Matrix n n ℝ) (π : stdSimplex ℝ n)
     intro hinv
     have k_singleton : ∀ i j, κ i {j} = ENNReal.ofReal (P i j) := by
       intro i j
-      have hmeas : MeasurableSet ({j} : Set n) := measurableSet_singleton j
-      change ((∑ k : n, ENNReal.ofReal (P i k) • Measure.dirac k) : Measure n) {j}
-              = ENNReal.ofReal (P i j)
-      have hsum :
-          ((∑ k : n, ENNReal.ofReal (P i k) • Measure.dirac k) : Measure n) {j}
-            = ∑ k : n, ENNReal.ofReal (P i k) * ({j} : Set n).indicator 1 k := by
-        simp [Measure.dirac_apply', hmeas]
-      rw [hsum, Finset.sum_eq_single j]
-      · simp [Set.indicator_of_mem, Set.mem_singleton_iff]
-      · intro x _ hx
-        simp [Set.indicator_of_notMem, hx]
-      · simp
-    have mu_singleton : ∀ j, μ {j} = ENNReal.ofReal (π.val j) := by
-      intro j
-      have hmeas : MeasurableSet ({j} : Set n) := measurableSet_singleton j
-      simp [μ, vecToMeasure, hmeas, Measure.dirac_apply']
-      rw [Finset.sum_eq_single j]
-      · simp [Set.indicator_of_mem, Set.mem_singleton_iff]
-      · intro x _ hx
-        simp [hx]
-      · simp
+      exact kernel_eval_singleton hP i j
     have mu_singleton : ∀ j, μ {j} = ENNReal.ofReal (π.val j) := by
       intro j
       have hmeas : MeasurableSet ({j} : Set n) := measurableSet_singleton j
@@ -207,18 +207,15 @@ theorem isReversible_iff_kernel_reversible (P : Matrix n n ℝ) (π : stdSimplex
     (hP : IsStochastic P) :
     IsReversible P π ↔
     Kernel.IsReversible (matrixToKernel P hP) (vecToMeasure π) := by
-  classical
   set κ := matrixToKernel P hP
   set μ := vecToMeasure (n := n) π
   constructor
   · -- (→) Matrix detailed balance ⇒ Kernel reversibility
-    intro hrev
-    intro A B hA hB
+    intro hrev A B hA hB
     have k_on_set :
         ∀ i, κ i B = ∑ j : n, ENNReal.ofReal (P i j) * B.indicator 1 j := by
       intro i
-      change ((∑ j : n, ENNReal.ofReal (P i j) • Measure.dirac j) : Measure n) B = _
-      simp [hB, Measure.dirac_apply']
+      exact kernel_eval_on_set hP i B hB
     have hL0' :
         ∫⁻ x, (A.indicator (fun x => κ x B)) x ∂μ
           = ∑ i : n, ENNReal.ofReal (π.val i) *
@@ -301,8 +298,7 @@ theorem isReversible_iff_kernel_reversible (P : Matrix n n ℝ) (π : stdSimplex
     have k_on_set' :
         ∀ j, κ j A = ∑ i : n, ENNReal.ofReal (P j i) * A.indicator 1 i := by
       intro j
-      change ((∑ i : n, ENNReal.ofReal (P j i) • Measure.dirac i) : Measure n) A = _
-      simp [hA, Measure.dirac_apply']
+      exact kernel_eval_on_set hP j A hA
     have hR1 :
         ∫⁻ x in B, κ x A ∂μ
           = ∑ j : n, ∑ i : n,
@@ -390,15 +386,7 @@ theorem isReversible_iff_kernel_reversible (P : Matrix n n ℝ) (π : stdSimplex
     intro hker
     have k_singleton : ∀ i j, κ i {j} = ENNReal.ofReal (P i j) := by
       intro i j
-      have hmeas : MeasurableSet ({j} : Set n) := measurableSet_singleton j
-      change ((∑ k : n, ENNReal.ofReal (P i k) • Measure.dirac k) : Measure n) {j}
-              = ENNReal.ofReal (P i j)
-      simp [hmeas, Measure.dirac_apply']
-      rw [Finset.sum_eq_single j]
-      · simp [Set.indicator_of_mem, Set.mem_singleton_iff]
-      · intro x _ hx
-        simp [Set.indicator_of_notMem, hx]
-      · simp
+      exact kernel_eval_singleton hP i j
     intro i j
     have hAi : MeasurableSet ({i} : Set n) := measurableSet_singleton i
     have hBj : MeasurableSet ({j} : Set n) := measurableSet_singleton j
@@ -411,7 +399,7 @@ theorem isReversible_iff_kernel_reversible (P : Matrix n n ℝ) (π : stdSimplex
           ∫⁻ x in ({i} : Set n), κ x {j} ∂μ
             = ∑ k : n, ENNReal.ofReal (π.val k) *
                 (({i} : Set n).indicator (fun x => κ x {j}) k) := by
-        simp [μ, vecToMeasure, lintegral_indicator hAi (fun x => κ x {j})]
+        simp [μ, vecToMeasure]
         ring_nf
         simp [Set.indicator_apply]
       have hsum :
@@ -495,7 +483,6 @@ instance matrixToKernel_isMarkov (P : Matrix n n ℝ) (hP : IsStochastic P) :
         (f := fun j => P i j) hnn).symm
   simp [hsum_univ, hsum_ofReal, hP.2 i]
 
-/-- Use the kernel version to prove reversibility implies stationarity -/
 theorem IsReversible.is_stationary' {P : Matrix n n ℝ} {π : stdSimplex ℝ n}
     (hP : IsStochastic P) (h_rev : IsReversible P π) :
     IsStationary P π := by
@@ -503,5 +490,6 @@ theorem IsReversible.is_stationary' {P : Matrix n n ℝ} {π : stdSimplex ℝ n}
   rw [isReversible_iff_kernel_reversible P π hP] at h_rev
   haveI : IsMarkovKernel (matrixToKernel P hP) := matrixToKernel_isMarkov P hP
   exact h_rev.invariant
+
 
 end MCMC.Finite
